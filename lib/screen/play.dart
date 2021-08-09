@@ -70,12 +70,16 @@ class PlayScreenState extends State<PlayScreen>
 
   void _afterLayout(_) async {
     Size screenSize = MediaQuery.of(context).size;
-    double cubeSize = min(screenSize.width, screenSize.height) / 6;
+    print('screen size $screenSize');
+    double topAreaHeight =min(screenSize.width, screenSize.height);
+
+    double cubeSize =  topAreaHeight/ 6;
+
     cube = Cube(pieceSize: cubeSize);
 
     setState(() {});
 
-    await shuffle();
+    // await shuffle();
 
     setState(() {
       waitInitShuffle = false;
@@ -117,8 +121,10 @@ class PlayScreenState extends State<PlayScreen>
   Widget build(BuildContext context) {
     Widget cubeArea;
     if(loaded) {
-      cubeArea = PlayCubeWidget(
-          cube: cube, touchable: !inAnimation, eventBus: eventBus);
+      cubeArea = LayoutBuilder(
+        builder: (context, constraints) => PlayCubeWidget(
+            cube: cube, touchable: !inAnimation, eventBus: eventBus,),
+      );
     }else{
       cubeArea = Center(child: Text("loading"),);
     }
@@ -126,8 +132,13 @@ class PlayScreenState extends State<PlayScreen>
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.black,
         body: Container(
+          decoration: BoxDecoration(
+            image:DecorationImage(
+              image: AssetImage("assets/images/cool_bg_1.jpg"),
+            )
+          ),
           child: Column(
             children: [
               Expanded(
@@ -135,39 +146,7 @@ class PlayScreenState extends State<PlayScreen>
                 child: Column(
                   children: [
                     Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Colors.cyanAccent,
-                          ),
-                        ),
-                      ),
-                      padding: EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          ElevatedButton(
-                            child: Text(
-                              "RESTART",
-                              style: TextStyle(fontSize: 12),
-                            ),
-                            onPressed: () async {
-                              if (inAnimation) {
-                                return;
-                              }
 
-                              cube.reset();
-                              setState(() {
-                                waitInitShuffle = true;
-                                showFinished = false;
-                              });
-                              await shuffle();
-                              setState(() {
-                                waitInitShuffle = false;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
                     ),
                     Expanded(
                       flex: 1,

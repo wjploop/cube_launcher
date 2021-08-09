@@ -6,6 +6,7 @@ import 'package:cube_launcher/data/event.dart';
 import 'package:event_bus/event_bus.dart' show EventBus;
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
@@ -18,14 +19,25 @@ class PlayCubeWidget extends StatefulWidget {
   final Cube cube;
   final bool touchable;
   final EventBus eventBus;
-  PlayCubeWidget({required this.cube, this.touchable = true, required this.eventBus});
+
+  PlayCubeWidget(
+      {required this.cube, this.touchable = true, required this.eventBus});
+
+  double cubeAreaHeight() => cube.pieceSize * 6;
+
 
   @override
   _PlayCubeWidgetState createState() => _PlayCubeWidgetState();
 }
 
 class _PlayCubeWidgetState extends State<PlayCubeWidget>
-    with PlayCubeMixin, SingleTickerProviderStateMixin {
+    with PlayCubeMixin, TickerProviderStateMixin {
+  late AnimationController controller;
+
+  double topOffset = 0;
+
+  bool isPreView = false;
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +45,7 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
 
   @override
   Widget build(BuildContext context) {
+    print('isPreview $isPreView');
     return GestureDetector(
       onPanStart: (DragStartDetails details) {
         if (!widget.touchable) {
@@ -45,7 +58,9 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
           return;
         }
         await onPanEnd(details);
+        setState(() {
 
+        });
       },
       onPanUpdate: (DragUpdateDetails details) {
         if (!widget.touchable) {
@@ -56,8 +71,21 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
           onPanUpdate(details);
         });
       },
+      onDoubleTap: () {
 
-      child: getCubePainter(widget.cube),
+        setState(() {
+          widget.cube.rotateToConfig();
+          isPreView = !isPreView;
+        });
+
+
+      },
+      child: Container(
+        color: Colors.transparent,
+        child: CubeWidget(
+          cube: getCube(),
+        ),
+      ),
     );
   }
 
@@ -74,6 +102,7 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
 
 mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
   Cube getCube();
+
   TickerProvider getVSync();
 
   PieceSurface? selectedSurface; // touch selected surface
@@ -194,16 +223,14 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
 
     if (selectedSurface == null) {
       // rotate the whole cube
+      // 确定当前滚动的的以哪个轴心滚动
       Vector3 axis = getCameraRotationAxis(details);
 
-      if (axis != null) {
-        // compute angle based on the length of dragging path
-        final angle = getCameraRotationAngle(details);
-        setState(() {
-          getCube().cameraMovedOnRelative(axis, angle);
-        });
-        totalAngle += angle;
-      }
+      final angle = getCameraRotationAngle(details);
+      setState(() {
+        getCube().cameraMovedOnRelative(axis, angle);
+      });
+      totalAngle += angle;
       return;
     }
 
@@ -259,6 +286,7 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
     return Vector3(-details.delta.dy, details.delta.dx, 0)..normalize();
   }
 
+  // 滚动的弧度
   double getCameraRotationAngle(DragUpdateDetails details) {
     final dx = details.delta.dx;
     final dy = details.delta.dy;
@@ -269,6 +297,7 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
 class AutoPlayCubeWidget extends StatefulWidget {
   final Cube cube;
   final EventBus eventBus;
+
   AutoPlayCubeWidget({required this.cube, required this.eventBus});
 
   @override
@@ -284,7 +313,6 @@ final Map<FaceColor, ui.Image?> cubeFaceImages = {
   FaceColor.ORANGE: null,
 };
 
-
 class _AutoPlayCubeWidgetState extends State<AutoPlayCubeWidget>
     with SingleTickerProviderStateMixin {
   Ticker? autoPlayTicker;
@@ -293,7 +321,6 @@ class _AutoPlayCubeWidgetState extends State<AutoPlayCubeWidget>
   @override
   void initState() {
     super.initState();
-
 
     startTicker();
 
@@ -348,6 +375,7 @@ final Paint _imagePaint = Paint();
 
 class CubePainter extends CustomPainter {
   CubePainter(this.cube);
+
   final Cube cube;
 
   @override
@@ -374,7 +402,6 @@ class CubePainter extends CustomPainter {
       canvas.save();
       canvas.transform(tsf.storage);
       canvas.scale(cube.pieceSize / cubeFaceImages[FaceColor.RED]!.width);
-
 
       var text = ps.face.toString().split(".").last;
       var builder = ui.ParagraphBuilder(ui.ParagraphStyle(
@@ -412,19 +439,15 @@ class CubePainter extends CustomPainter {
   bool shouldRepaint(CubePainter other) => true;
 }
 
-
-
 Widget getCubePainter(Cube cube) {
   return Container(
-    // 魔方之外接受触摸事件，移动视角
     color: Colors.transparent,
-    child: Center(
-      child: CubeWidget(
-        cube: cube,
-      ),
+    child: CubeWidget(
+      cube: cube,
     ),
   );
 }
+
 //
 // Widget getCubePainter(Cube cube) {
 //   return CustomPaint(
@@ -444,4 +467,3 @@ int getMoveStep(double angle, double stepAngle) {
 double getMoveRestoreAngle(double angle, double stepAngle) {
   return getMoveStep(angle, stepAngle) * stepAngle - angle;
 }
-

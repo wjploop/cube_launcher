@@ -42,6 +42,7 @@ class CubeLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(ui.Size size) {
+    print('cube size $size');
     var center = size.center(Offset.zero);
     cube.orderedPaintSurfaces.forEach((PieceSurface ps) {
       var id = ps.piece.toString() + ps.face.toString();

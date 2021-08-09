@@ -49,9 +49,7 @@ class Cube {
   void rotateToConfig(){
     cameraTransform
       ..setIdentity()
-      ..setEntry(3, 2, -0.0015)
-    // ..rotateX(pi/4)
-    ;
+    ..setEntry(3,2, -0.0015); // 仅仅是设置 z 轴视觉高度，越远越小的效果
     cameraChanged();
   }
   void reset() {
@@ -121,6 +119,8 @@ class Cube {
     }
   }
 
+  // 以Z轴高度由高到底排序
+  // 在外面的优先收到触摸事件
   List<PieceSurface> orderedTouchableSurfaces() {
     List<PieceSurface> result = [];
     pieces.forEach((p) {

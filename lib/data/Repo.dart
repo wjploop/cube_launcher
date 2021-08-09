@@ -6,6 +6,9 @@ import 'package:device_apps/device_apps.dart';
 import 'AppInfo.dart';
 
 class Repo {
+
+  static List<AppInfo> apps =[];
+
   static Map<FaceColor, List<AppInfo?>> map = {
     FaceColor.YELLOW: List.filled(9, null, growable: false),
     FaceColor.GREEN: List.filled(9, null, growable: false),
@@ -17,7 +20,10 @@ class Repo {
 
   static Future<void> init() async {
     print('apps start');
-    var apps = await getApps();
+
+    if(apps.isEmpty) {
+      apps = await getApps();
+    }
 
     print('apps end = ${apps.length}');
     for (int i = 0; i < 6; i++) {
@@ -27,6 +33,8 @@ class Repo {
         map[FaceColor.values[i]]?[j] = app;
       }
     }
+    return ;
+
   }
 
   static Future<List<AppInfo>> getApps() async {
@@ -43,6 +51,8 @@ class Repo {
         k.packageName,
       );
     }).toList(growable: false);
+
+    apps = res;
 
     return Future.value(res);
   }
