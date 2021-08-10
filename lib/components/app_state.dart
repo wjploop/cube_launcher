@@ -3,49 +3,44 @@ import 'package:flutter/material.dart';
 
 import 'cube.dart';
 
-class AppData with ChangeNotifier{
-  bool hadLoad =false;
+class AppData with ChangeNotifier {
+  bool hadLoad = false;
 
-  void loaded(){
-    hadLoad =true;
+  void loaded() {
+    hadLoad = true;
     notifyListeners();
   }
 }
 
-
-class FaceColorMap with ChangeNotifier{
-
+class FaceColorMap with ChangeNotifier {
   Map<FaceColor, List<AppInfo?>>? map;
 
   FaceColorMap(this.map);
 
-  void update(Map<FaceColor,List<AppInfo?>>? map){
+  void update(Map<FaceColor, List<AppInfo?>>? map) {
     this.map = map;
     notifyListeners();
   }
 
-
   @override
-  bool operator == (Object other) {
-    if((other is FaceColorMap)) {
-      return map==other.map;
+  bool operator ==(Object other) {
+    if ((other is FaceColorMap)) {
+      return map == other.map;
     }
     return false;
   }
 
   @override
   int get hashCode => super.hashCode;
-
 }
 
-class EditingState with ChangeNotifier{
+class EditingState with ChangeNotifier {
   bool editing;
 
   EditingState(this.editing);
 
-  void update(editing){
+  void update(editing) {
     this.editing = editing;
     notifyListeners();
   }
-
 }

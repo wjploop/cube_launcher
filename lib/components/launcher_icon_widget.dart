@@ -2,8 +2,6 @@ import 'dart:ui';
 
 import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/data/AppInfo.dart';
-import 'package:cube_launcher/data/Repo.dart';
-import 'package:cube_launcher/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,8 +20,6 @@ class LauncherIconWidget extends StatelessWidget {
       required this.editing})
       : super(key: key);
 
-
-
   @override
   Widget build(BuildContext context) {
     if (faceColor == FaceColor.BLACK) {
@@ -37,8 +33,8 @@ class LauncherIconWidget extends StatelessWidget {
       var app = currentFace![positionInAFace];
 
       Widget AppIcon(
-          AppInfo app,
-          ) {
+        AppInfo app,
+      ) {
         return ClipOval(
           child: Container(
             padding: EdgeInsets.all(10),
@@ -58,7 +54,7 @@ class LauncherIconWidget extends StatelessWidget {
                   return true;
                 },
                 builder: (context, candidateData, rejectedData) {
-                  if(candidateData.isEmpty){
+                  if (candidateData.isEmpty) {
                     return Container();
                   }
                   return AppIcon(candidateData.first!);
@@ -68,7 +64,6 @@ class LauncherIconWidget extends StatelessWidget {
                   map.map?[faceColor] = currentFace;
                   context.read<FaceColorMap>().update(map.map);
                 },
-
               ),
             )
           : Stack(

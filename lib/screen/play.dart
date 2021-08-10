@@ -57,23 +57,21 @@ class PlayScreenState extends State<PlayScreen>
     WidgetsBinding.instance?.addPostFrameCallback(_afterLayout);
 
     loadAppInfo();
-
   }
 
-  void loadAppInfo() async{
-     await Repo.init();
-     setState(() {
-       loaded =true;
-     });
-
+  void loadAppInfo() async {
+    await Repo.init();
+    setState(() {
+      loaded = true;
+    });
   }
 
   void _afterLayout(_) async {
     Size screenSize = MediaQuery.of(context).size;
     print('screen size $screenSize');
-    double topAreaHeight =min(screenSize.width, screenSize.height);
+    double topAreaHeight = min(screenSize.width, screenSize.height);
 
-    double cubeSize =  topAreaHeight/ 6;
+    double cubeSize = topAreaHeight / 6;
 
     cube = Cube(pieceSize: cubeSize);
 
@@ -120,13 +118,18 @@ class PlayScreenState extends State<PlayScreen>
   @override
   Widget build(BuildContext context) {
     Widget cubeArea;
-    if(loaded) {
+    if (loaded) {
       cubeArea = LayoutBuilder(
         builder: (context, constraints) => PlayCubeWidget(
-            cube: cube, touchable: !inAnimation, eventBus: eventBus,),
+          cube: cube,
+          touchable: !inAnimation,
+          eventBus: eventBus,
+        ),
       );
-    }else{
-      cubeArea = Center(child: Text("loading"),);
+    } else {
+      cubeArea = Center(
+        child: Text("loading"),
+      );
     }
 
     return WillPopScope(
@@ -135,19 +138,16 @@ class PlayScreenState extends State<PlayScreen>
         backgroundColor: Colors.black,
         body: Container(
           decoration: BoxDecoration(
-            image:DecorationImage(
-              image: AssetImage("assets/images/cool_bg_1.jpg"),
-            )
-          ),
+              image: DecorationImage(
+            image: AssetImage("assets/images/cool_bg_1.jpg"),
+          )),
           child: Column(
             children: [
               Expanded(
                 flex: 1,
                 child: Column(
                   children: [
-                    Container(
-
-                    ),
+                    Container(),
                     Expanded(
                       flex: 1,
                       child: Container(

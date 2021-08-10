@@ -46,12 +46,13 @@ class Cube {
     return r.angleTo(axisX);
   }
 
-  void rotateToConfig(){
+  void rotateToConfig() {
     cameraTransform
       ..setIdentity()
-    ..setEntry(3,2, -0.0015); // 仅仅是设置 z 轴视觉高度，越远越小的效果
+      ..setEntry(3, 2, -0.0015); // 仅仅是设置 z 轴视觉高度，越远越小的效果
     cameraChanged();
   }
+
   void reset() {
     cameraTransform.setIdentity();
     cameraTransform
@@ -545,7 +546,7 @@ int getPosition(int position, Face face, FaceColor color) {
     }
   } else if (color == FaceColor.GREEN) {
     return position ~/ 3;
-  }else if(color == FaceColor.BLUE) {
+  } else if (color == FaceColor.BLUE) {
     return position ~/ 3;
   }
 

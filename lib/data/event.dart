@@ -1,5 +1,6 @@
 class AutoPlayEvent {
   final bool play;
+
   AutoPlayEvent({required this.play});
 }
 

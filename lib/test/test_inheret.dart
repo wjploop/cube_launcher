@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class Item {
-   String reference;
+  String reference;
 
-   Item(this.reference);
+  Item(this.reference);
 }
 
 class _MyInherited extends InheritedWidget {
@@ -25,19 +25,21 @@ class MyInheritedWidget extends StatefulWidget {
   MyInheritedWidget({
     Key? key,
     required this.child,
-  }): super(key: key);
+  }) : super(key: key);
 
   final Widget child;
 
   @override
   MyInheritedWidgetState createState() => new MyInheritedWidgetState();
 
-  static MyInheritedWidgetState of(BuildContext context){
-    return (context.dependOnInheritedWidgetOfExactType<_MyInherited>() as _MyInherited).data;
+  static MyInheritedWidgetState of(BuildContext context) {
+    return (context.dependOnInheritedWidgetOfExactType<_MyInherited>()
+            as _MyInherited)
+        .data;
   }
 }
 
-class MyInheritedWidgetState extends State<MyInheritedWidget>{
+class MyInheritedWidgetState extends State<MyInheritedWidget> {
   /// List of Items
   List<Item> _items = <Item>[];
 
@@ -45,14 +47,14 @@ class MyInheritedWidgetState extends State<MyInheritedWidget>{
   int get itemsCount => _items.length;
 
   /// Helper method to add an Item
-  void addItem(String reference){
-    setState((){
+  void addItem(String reference) {
+    setState(() {
       _items.add(new Item(reference));
     });
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return new _MyInherited(
       data: this,
       child: widget.child,
@@ -97,7 +99,7 @@ class WidgetA extends StatelessWidget {
   Widget build(BuildContext context) {
     final MyInheritedWidgetState state = MyInheritedWidget.of(context);
     return new Container(
-      child: new RaisedButton(
+      child: new ElevatedButton(
         child: new Text('Add Item'),
         onPressed: () {
           state.addItem('new item');

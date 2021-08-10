@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:cube_launcher/components/app_state.dart';
-import 'package:cube_launcher/data/Repo.dart';
 import 'package:cube_launcher/data/event.dart';
 import 'package:event_bus/event_bus.dart' show EventBus;
 import 'package:flutter/material.dart';
@@ -23,7 +22,6 @@ class PlayCubeWidget extends StatefulWidget {
   final bool touchable;
   final EventBus eventBus;
 
-
   PlayCubeWidget(
       {required this.cube, this.touchable = true, required this.eventBus});
 
@@ -37,7 +35,6 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
     with PlayCubeMixin, TickerProviderStateMixin {
   late AnimationController controller;
 
-
   @override
   void initState() {
     super.initState();
@@ -46,8 +43,7 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
   @override
   Widget build(BuildContext context) {
     return Consumer<EditingState>(
-      builder: (context, edtingState, child) =>
-       GestureDetector(
+      builder: (context, edtingState, child) => GestureDetector(
         onPanStart: (DragStartDetails details) {
           if (!widget.touchable) {
             return;

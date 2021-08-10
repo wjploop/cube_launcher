@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:cube_launcher/components/cube.dart';
 import 'package:device_apps/device_apps.dart';
@@ -6,8 +5,7 @@ import 'package:device_apps/device_apps.dart';
 import 'AppInfo.dart';
 
 class Repo {
-
-  static List<AppInfo> apps =[];
+  static List<AppInfo> apps = [];
 
   static Map<FaceColor, List<AppInfo?>> map = {
     FaceColor.YELLOW: List.filled(9, null, growable: false),
@@ -21,7 +19,7 @@ class Repo {
   static Future<void> init() async {
     print('apps start');
 
-    if(apps.isEmpty) {
+    if (apps.isEmpty) {
       apps = await getApps();
     }
 
@@ -33,8 +31,7 @@ class Repo {
         map[FaceColor.values[i]]?[j] = app;
       }
     }
-    return ;
-
+    return;
   }
 
   static Future<List<AppInfo>> getApps() async {

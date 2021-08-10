@@ -45,7 +45,7 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
             builder: (context, appdata, child) => Container(
               decoration: BoxDecoration(
                   image: DecorationImage(
-                    fit: BoxFit.cover,
+                fit: BoxFit.cover,
                 image: AssetImage("assets/images/cool_bg_1.jpg"),
               )),
               child: Stack(
@@ -54,10 +54,14 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                       duration: Duration(milliseconds: 3000),
                       top: appdata.hadLoad ? 0 : -topAreaHeight,
                       child: Container(
-                        constraints: BoxConstraints.tight(Size(screenSize.width,topAreaHeight)),
-                        height: topAreaHeight,
-                        child: PlayCubeWidget(cube:cube,touchable: true,eventBus: eventBus,)
-                      )),
+                          constraints: BoxConstraints.tight(
+                              Size(screenSize.width, topAreaHeight)),
+                          height: topAreaHeight,
+                          child: PlayCubeWidget(
+                            cube: cube,
+                            touchable: true,
+                            eventBus: eventBus,
+                          ))),
                   AnimatedPositioned(
                       top: appdata.hadLoad ? topAreaHeight : 0,
                       duration: Duration(milliseconds: 3000),
