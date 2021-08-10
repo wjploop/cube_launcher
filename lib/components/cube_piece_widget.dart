@@ -7,25 +7,29 @@ import 'dart:ui' as ui;
 import 'cube.dart';
 import 'launcher_icon_widget.dart';
 
-
 class CubeWidget extends StatelessWidget {
-  const CubeWidget({Key? key, required this.cube}) : super(key: key);
+  final bool editing;
+
+  const CubeWidget({Key? key, required this.cube, this.editing = false})
+      : super(key: key);
   final Cube cube;
 
   @override
   Widget build(BuildContext context) {
-
-    var widgets = cube.orderedPaintSurfaces.asMap().entries
-        .map((e) {
-          int index = e.value.positionInSameColor;
-          PieceSurface ps = e.value;
+    var widgets = cube.orderedPaintSurfaces.asMap().entries.map((e) {
+      int index = e.value.positionInSameColor;
+      PieceSurface ps = e.value;
       return LayoutId(
         id: ps.piece.toString() + ps.face.toString(),
         child: Transform(
           transform: cube.cameraTransform.multiplied(ps.piece.transform)
             ..multiply(ps.canvasTransform),
           alignment: Alignment.center,
-          child: LauncherIconWidget(faceColor: ps.color, positionInAFace:index),
+          child: LauncherIconWidget(
+            faceColor: ps.color,
+            positionInAFace: index,
+            editing: editing,
+          ),
         ),
       );
     }).toList();

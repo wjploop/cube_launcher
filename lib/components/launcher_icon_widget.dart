@@ -1,65 +1,133 @@
 import 'dart:ui';
 
+import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/data/AppInfo.dart';
 import 'package:cube_launcher/data/Repo.dart';
+import 'package:cube_launcher/main.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'cube.dart';
 
 class LauncherIconWidget extends StatelessWidget {
   final FaceColor faceColor;
   final int positionInAFace;
+  final bool editing;
 
-  const LauncherIconWidget({Key? key, required this.faceColor, required this.positionInAFace})
+  const LauncherIconWidget(
+      {Key? key,
+      required this.faceColor,
+      required this.positionInAFace,
+      required this.editing})
       : super(key: key);
+
+
 
   @override
   Widget build(BuildContext context) {
     if (faceColor == FaceColor.BLACK) {
       return Container(
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(0),
-            color: colorMap[faceColor],
-            border: Border.all(color: Colors.black)),
-        padding: EdgeInsets.all(10),
+        color: Colors.black,
       );
     }
+    return Consumer<FaceColorMap>(builder: (context, map, child) {
+      var currentFace = map.map?[faceColor]!;
 
-    var app = Repo.map[faceColor]![positionInAFace];
+      var app = currentFace![positionInAFace];
 
-    var appIcon = app == null
-        ? Container()
-        : ClipOval(
-          child: Image.memory(
+      Widget AppIcon(
+          AppInfo app,
+          ) {
+        return ClipOval(
+          child: Container(
+            padding: EdgeInsets.all(10),
+            child: Image.memory(
               app.icon,
               color: colorMap[faceColor],
               colorBlendMode: BlendMode.lighten,
             ),
+          ),
         );
+      }
 
-    // appIcon = Center(child: Text("${app.name}",));
+      var appIcon = app == null
+          ? Container(
+              child: DragTarget<AppInfo>(
+                onWillAccept: (data) {
+                  return true;
+                },
+                builder: (context, candidateData, rejectedData) {
+                  if(candidateData.isEmpty){
+                    return Container();
+                  }
+                  return AppIcon(candidateData.first!);
+                },
+                onAccept: (data) {
+                  currentFace[positionInAFace] = data;
+                  map.map?[faceColor] = currentFace;
+                  context.read<FaceColorMap>().update(map.map);
+                },
 
-    var icon = Container(
-      decoration: BoxDecoration(
-          color: colorMap[faceColor],
-          border: Border.all(color: Colors.black, width: 1)),
-      padding: EdgeInsets.all(10),
-      child: appIcon,
-    );
+              ),
+            )
+          : Stack(
+              children: [
+                AppIcon(app),
+                Container(
+                  constraints: BoxConstraints.expand(),
+                  alignment: Alignment.topRight,
+                  child: LayoutBuilder(builder: (context, constraints) {
+                    var closeIconSize = constraints.maxWidth / 3;
+                    return Visibility(
+                      visible: editing,
+                      child: GestureDetector(
+                        onTap: () {
+                          // 将该app移除
+                          currentFace[positionInAFace] = null;
+                          map.map?[faceColor] = currentFace;
+                          context.read<FaceColorMap>().update(map.map);
+                        },
+                        child: Container(
+                          margin: EdgeInsets.all(4),
+                          width: closeIconSize,
+                          height: closeIconSize,
+                          child: ClipOval(
+                              child: Container(
+                                  color: Colors.white60,
+                                  padding: EdgeInsets.all(4),
+                                  child: Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: closeIconSize - 8,
+                                  ))),
+                        ),
+                      ),
+                    );
+                  }),
+                )
+              ],
+            );
 
-    return GestureDetector(
-      onTap: () {
-        app?.rawApp.openApp();
-      },
-      onLongPress: (){
-        app?.rawApp.openSettingsScreen();
-      },
-      child: Container(
-        child: Center(
+      var icon = Container(
+        decoration: BoxDecoration(
+            color: colorMap[faceColor],
+            border: Border.all(color: Colors.black, width: 1)),
+        child: appIcon,
+      );
+
+      return GestureDetector(
+        onTap: () {
+          app?.rawApp.openApp();
+        },
+        onLongPress: () {
+          app?.rawApp.openSettingsScreen();
+        },
+        child: Container(
           child: icon,
         ),
-      ),
-    );
+      );
+    });
   }
 }
 

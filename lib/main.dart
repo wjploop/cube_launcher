@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'data/Repo.dart';
+
 void main() {
   runApp( App());
 }
@@ -21,9 +23,15 @@ class App extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ChangeNotifierProvider(
-        create: (context) => AppData(),
-        child: AreaTopBottom(),
+      home: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => AppData(),),
+          ChangeNotifierProvider(create: (context) => EditingState(false),),
+          ChangeNotifierProvider(create: (context) => FaceColorMap(Repo.map),),
+        ],
+        child: Scaffold(body: Container(
+          color: Colors.blue,
+            child: AreaTopBottom())),
       )
     );
   }

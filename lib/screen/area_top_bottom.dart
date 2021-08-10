@@ -24,7 +24,6 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
 
   bool loadingApp = true;
 
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -32,22 +31,21 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
         var screenSize = Size(constraints.maxWidth, constraints.maxHeight);
         var topAreaHeight = min(screenSize.width, screenSize.height);
 
+        print('screen size $screenSize');
+
         var cubeSize = topAreaHeight / 6;
 
         cube = Cube(pieceSize: cubeSize);
 
         EventBus eventBus = EventBus();
 
-
         return GestureDetector(
-          onDoubleTap: (){
-
-          },
+          onDoubleTap: () {},
           child: Consumer<AppData>(
-            builder: (context, appdata, child) =>
-            Container(
+            builder: (context, appdata, child) => Container(
               decoration: BoxDecoration(
                   image: DecorationImage(
+                    fit: BoxFit.cover,
                 image: AssetImage("assets/images/cool_bg_1.jpg"),
               )),
               child: Stack(
@@ -61,7 +59,7 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                         child: PlayCubeWidget(cube:cube,touchable: true,eventBus: eventBus,)
                       )),
                   AnimatedPositioned(
-                      top: appdata.hadLoad ? topAreaHeight :0,
+                      top: appdata.hadLoad ? topAreaHeight : 0,
                       duration: Duration(milliseconds: 3000),
                       child: SizedBox.fromSize(
                         size: screenSize,

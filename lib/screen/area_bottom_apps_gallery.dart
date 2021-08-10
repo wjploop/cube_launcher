@@ -6,11 +6,6 @@ import 'package:cube_launcher/data/Repo.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: AppGalley(),
-  ));
-}
 
 class AppGalley extends StatefulWidget {
   const AppGalley({Key? key}) : super(key: key);
@@ -52,6 +47,8 @@ class _AppGalleyState extends State<AppGalley> {
   }
 }
 
+
+
 class GalleryItem extends StatelessWidget {
   final AppInfo app;
 
@@ -61,33 +58,44 @@ class GalleryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
     var iconSize = screenSize.width/5 - 26;
-    return Container(
-      height: iconSize*3,
-      width: iconSize,
-      child: Center(
-        child: Column(
-          children: [
-            Container(
-              child: ClipOval(
-                child: Image.memory(
-                  app.icon,
-                  width: iconSize,
-                  height: iconSize,
+    return LongPressDraggable(
+      data: app,
+      feedback:  ClipOval(
+        child: Image.memory(
+          app.icon,
+          width: iconSize,
+          height: iconSize,
+        ),
+      ),
+
+      child: Container(
+        height: iconSize*3,
+        width: iconSize,
+        child: Center(
+          child: Column(
+            children: [
+              Container(
+                child: ClipOval(
+                  child: Image.memory(
+                    app.icon,
+                    width: iconSize,
+                    height: iconSize,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 10,),
-            Container(
-              child: Text(
-                "${app.name}",
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
+              SizedBox(height: 10,),
+              Container(
+                child: Text(
+                  "${app.name}",
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
 
-                style: Theme.of(context).textTheme.caption?.copyWith(color: Colors.white),
-              ),
-            )
-          ],
+                  style: Theme.of(context).textTheme.caption?.copyWith(color: Colors.white),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

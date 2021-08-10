@@ -2,12 +2,15 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:cube_launcher/components/app_state.dart';
+import 'package:cube_launcher/data/Repo.dart';
 import 'package:cube_launcher/data/event.dart';
 import 'package:event_bus/event_bus.dart' show EventBus;
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'cube.dart';
@@ -20,11 +23,11 @@ class PlayCubeWidget extends StatefulWidget {
   final bool touchable;
   final EventBus eventBus;
 
+
   PlayCubeWidget(
       {required this.cube, this.touchable = true, required this.eventBus});
 
   double cubeAreaHeight() => cube.pieceSize * 6;
-
 
   @override
   _PlayCubeWidgetState createState() => _PlayCubeWidgetState();
@@ -34,9 +37,6 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
     with PlayCubeMixin, TickerProviderStateMixin {
   late AnimationController controller;
 
-  double topOffset = 0;
-
-  bool isPreView = false;
 
   @override
   void initState() {
@@ -45,45 +45,43 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
 
   @override
   Widget build(BuildContext context) {
-    print('isPreview $isPreView');
-    return GestureDetector(
-      onPanStart: (DragStartDetails details) {
-        if (!widget.touchable) {
-          return;
-        }
-        onPanStart(details);
-      },
-      onPanEnd: (DragEndDetails details) async {
-        if (!widget.touchable) {
-          return;
-        }
-        await onPanEnd(details);
-        setState(() {
-
-        });
-      },
-      onPanUpdate: (DragUpdateDetails details) {
-        if (!widget.touchable) {
-          return;
-        }
-        // 移动中
-        setState(() {
-          onPanUpdate(details);
-        });
-      },
-      onDoubleTap: () {
-
-        setState(() {
-          widget.cube.rotateToConfig();
-          isPreView = !isPreView;
-        });
-
-
-      },
-      child: Container(
-        color: Colors.transparent,
-        child: CubeWidget(
-          cube: getCube(),
+    return Consumer<EditingState>(
+      builder: (context, edtingState, child) =>
+       GestureDetector(
+        onPanStart: (DragStartDetails details) {
+          if (!widget.touchable) {
+            return;
+          }
+          onPanStart(details);
+        },
+        onPanEnd: (DragEndDetails details) async {
+          if (!widget.touchable) {
+            return;
+          }
+          await onPanEnd(details);
+          setState(() {});
+        },
+        onPanUpdate: (DragUpdateDetails details) {
+          if (!widget.touchable) {
+            return;
+          }
+          // 移动中
+          setState(() {
+            onPanUpdate(details);
+          });
+        },
+        onDoubleTap: () {
+          setState(() {
+            widget.cube.rotateToConfig();
+            edtingState.update(!edtingState.editing);
+          });
+        },
+        child: Container(
+          color: Colors.transparent,
+          child: CubeWidget(
+            editing: context.watch<EditingState>().editing,
+            cube: getCube(),
+          ),
         ),
       ),
     );
@@ -244,19 +242,19 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
 
     if (currentAxis == null) {
       List<Vector3> axes = [axisX, axisY, axisZ]..sort((a, b) {
-        final aAngleToNormal = (_90Degree - a.angleTo(normal)).abs();
-        final bAngleToNormal = (_90Degree - b.angleTo(normal)).abs();
+          final aAngleToNormal = (_90Degree - a.angleTo(normal)).abs();
+          final bAngleToNormal = (_90Degree - b.angleTo(normal)).abs();
 
-        // decide which axis is more like stand vertical on the surface normal
-        if (almostZero(aAngleToNormal - bAngleToNormal)) {
-          // this axis is close, then compute the angle between move direction and axis
-          return (_90Degree - b.angleTo(moveV))
-              .abs()
-              .compareTo((_90Degree - a.angleTo(moveV)).abs());
-        }
+          // decide which axis is more like stand vertical on the surface normal
+          if (almostZero(aAngleToNormal - bAngleToNormal)) {
+            // this axis is close, then compute the angle between move direction and axis
+            return (_90Degree - b.angleTo(moveV))
+                .abs()
+                .compareTo((_90Degree - a.angleTo(moveV)).abs());
+          }
 
-        return bAngleToNormal.compareTo(aAngleToNormal);
-      });
+          return bAngleToNormal.compareTo(aAngleToNormal);
+        });
 
       currentAxis = axes.last.clone();
       // search all pieces on the rotating plane
