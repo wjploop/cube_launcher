@@ -166,6 +166,9 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
     if (_inAnimation) {
       return;
     }
+    if (context.read<EditingState>().editing) {
+      return;
+    }
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
     Size boxSize = renderBox.size;
