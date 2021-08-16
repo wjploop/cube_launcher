@@ -34,13 +34,3 @@ class FaceColorMap with ChangeNotifier {
   int get hashCode => super.hashCode;
 }
 
-class EditingState with ChangeNotifier {
-  bool editing;
-
-  EditingState(this.editing);
-
-  void update(editing) {
-    this.editing = editing;
-    notifyListeners();
-  }
-}

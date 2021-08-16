@@ -71,41 +71,39 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
           onDoubleTap: () {},
           child: Consumer<AppData>(
             builder: (context, appdata, child) => Container(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                fit: BoxFit.cover,
-                image: AssetImage("assets/images/cool_bg_1.jpg"),
-              )),
-              child: ChangeNotifierProvider(
-                create: (context) => MenuState(MenuPosition.top),
-                builder: (context, child) {
-                  var menuPosition = context.watch<MenuState>().position;
-                  return Stack(
-                    children: [
-                      AnimatedPositioned(
-                          duration: Duration(milliseconds: 500),
-                          top: cubeTop(menuPosition),
-                          child: Container(
-                              constraints: BoxConstraints.tight(
-                                  Size(screenSize.width, topAreaHeight)),
-                              height: topAreaHeight,
-                              child: PlayCubeWidget(
-                                cube: cube,
-                                touchable: true,
-                                eventBus: eventBus,
-                              ))),
-                      AnimatedPositioned(
-                          top: galleryTop(menuPosition),
-                          duration: Duration(milliseconds: 500),
-                          child: SizedBox.fromSize(
-                            size: screenSize,
-                            child: AppGalley(),
-                          ))
-                    ],
-                  );
-                },
-              ),
-            ),
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: AssetImage("assets/images/cool_bg_1.jpg"),
+                )),
+                child: Builder(
+                  builder: (context) {
+                    var menuPosition = context.watch<MenuState>().position;
+                    return Stack(
+                      children: [
+                        AnimatedPositioned(
+                            duration: Duration(milliseconds: 500),
+                            top: cubeTop(menuPosition),
+                            child: Container(
+                                constraints: BoxConstraints.tight(
+                                    Size(screenSize.width, topAreaHeight)),
+                                height: topAreaHeight,
+                                child: PlayCubeWidget(
+                                  cube: cube,
+                                  touchable: true,
+                                  eventBus: eventBus,
+                                ))),
+                        AnimatedPositioned(
+                            top: galleryTop(menuPosition),
+                            duration: Duration(milliseconds: 500),
+                            child: SizedBox.fromSize(
+                              size: screenSize,
+                              child: AppGalley(),
+                            ))
+                      ],
+                    );
+                  },
+                )),
           ),
         );
       },
@@ -114,16 +112,48 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
 }
 
 class MenuState with ChangeNotifier {
-  late MenuPosition position;
+  MenuPosition position;
+  bool edit;
 
-  MenuState(MenuPosition position) {
-    this.position = position;
-  }
+  MenuState(this.position, this.edit);
 
-  void update(MenuPosition position) {
+  void update(MenuPosition position, bool edit) {
+    this.edit = edit;
     this.position = position;
     notifyListeners();
   }
+
+  List<MenuAction> actions() {
+    List<MenuAction> actions = [];
+    switch (position) {
+      case MenuPosition.top:
+        actions.addAll({MenuAction.action_arrow_down});
+        break;
+      case MenuPosition.middle:
+        if (edit) {
+          actions.add(MenuAction.action_choose_color);
+        }
+        actions.addAll({
+          MenuAction.action_editing_cube,
+          MenuAction.action_arrow_up,
+          MenuAction.action_arrow_down
+        });
+        break;
+      case MenuPosition.bottom:
+        actions.addAll({MenuAction.action_arrow_up});
+        break;
+      default:
+        break;
+    }
+    return actions;
+  }
+}
+
+enum MenuAction {
+  action_arrow_up,
+  action_arrow_down,
+  action_editing_cube,
+  action_choose_color,
 }
 
 enum MenuPosition {
@@ -137,5 +167,5 @@ MenuPosition next(MenuPosition cur) {
 }
 
 MenuPosition prev(MenuPosition cur) {
-  return MenuPosition.values[(cur.index + 1) % MenuPosition.values.length];
+  return MenuPosition.values[(cur.index - 1) % MenuPosition.values.length];
 }

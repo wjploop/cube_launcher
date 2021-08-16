@@ -1,5 +1,6 @@
 import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/screen/area_top_bottom.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -20,14 +21,18 @@ class App extends StatelessWidget {
         title: "cube launcher",
         theme: ThemeData(
           primarySwatch: Colors.blue,
+          primaryColor: Colors.white,
         ),
         home: MultiProvider(
           providers: [
+            Provider(
+              create: (context) => EventBus(),
+            ),
             ChangeNotifierProvider(
               create: (context) => AppData(),
             ),
             ChangeNotifierProvider(
-              create: (context) => EditingState(false),
+              create: (context) => MenuState(MenuPosition.top, false),
             ),
             ChangeNotifierProvider(
               create: (context) => FaceColorMap(Repo.map),

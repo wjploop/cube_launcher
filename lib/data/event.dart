@@ -7,3 +7,5 @@ class AutoPlayEvent {
 class CubeFinishedEvent {}
 
 class ClockResetEvent {}
+
+class RotateToEditEvent {}

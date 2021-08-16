@@ -3,7 +3,9 @@ import 'dart:ui';
 import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/data/AppInfo.dart';
 import 'package:cube_launcher/data/Repo.dart';
+import 'package:cube_launcher/data/event.dart';
 import 'package:cube_launcher/screen/area_top_bottom.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,8 +29,55 @@ class _AppGalleyState extends State<AppGalley> {
     await Repo.init();
     context.read<AppData>().loaded();
     Future.delayed(Duration(seconds: 2), () {
-      context.read<MenuState>().update(MenuPosition.middle);
+      context.read<MenuState>().update(MenuPosition.middle, false);
     });
+  }
+
+  Widget menuActionToWidget(MenuState state, MenuAction action) {
+    var icon = action == MenuAction.action_arrow_up
+        ? Icons.arrow_circle_up_rounded
+        : action == MenuAction.action_arrow_down
+            ? Icons.arrow_circle_down_rounded
+            : action == MenuAction.action_editing_cube
+                ? Icons.edit_rounded
+                : action == MenuAction.action_choose_color
+                    ? Icons.color_lens_rounded
+                    : throw Exception("no support action");
+
+    void statePrev() {
+      state.update(prev(state.position), false);
+      setState(() {
+        showAction = false;
+      });
+    }
+
+    void stateNext() {
+      state.update(next(state.position), false);
+      setState(() {
+        showAction = false;
+      });
+    }
+
+    void stateEdit() {
+      context.read<EventBus>().fire(RotateToEditEvent());
+      state.update(state.position, !state.edit);
+    }
+
+    void emptyAction() {}
+
+    var actionFun = action == MenuAction.action_arrow_up
+        ? statePrev
+        : action == MenuAction.action_arrow_down
+            ? stateNext
+            : action == MenuAction.action_editing_cube
+                ? stateEdit
+                : emptyAction;
+
+    return IconButton(
+        onPressed: () {
+          actionFun();
+        },
+        icon: Icon(icon, color: Colors.white));
   }
 
   @override
@@ -43,51 +92,35 @@ class _AppGalleyState extends State<AppGalley> {
               Center(
                 child: Text("Cube Launcher"),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        showAction = !showAction;
-                      });
-                    },
-                    icon: Icon(
-                      Icons.more_horiz,
-                      size: 26,
-                    )),
+              Row(
+                children: [
+                  Expanded(
+                      child: Visibility(
+                    visible: showAction,
+                    child: Container(
+                      color: Colors.deepPurple,
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: context
+                              .read<MenuState>()
+                              .actions()
+                              .map((e) => menuActionToWidget(
+                                  context.read<MenuState>(), e))
+                              .toList()),
+                    ),
+                  )),
+                  IconButton(
+                      onPressed: () {
+                        setState(() {
+                          showAction = !showAction;
+                        });
+                      },
+                      icon: Icon(
+                        Icons.more_horiz,
+                        size: 26,
+                      )),
+                ],
               ),
-              Visibility(
-                visible: showAction,
-                child: Container(
-                  color: Colors.deepPurple.shade50,
-                  child: Row(
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              showAction = false;
-                            });
-                            MenuState menuState = context.read<MenuState>();
-                            menuState.update(prev(menuState.position));
-                          },
-                          icon: Icon(Icons.arrow_circle_up_rounded,
-                              color: Colors.white)),
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              showAction = false;
-                            });
-                            MenuState menuState = context.read<MenuState>();
-                            menuState.update(next(menuState.position));
-                          },
-                          icon: Icon(
-                            Icons.arrow_circle_down_rounded,
-                            color: Colors.white,
-                          )),
-                    ],
-                  ),
-                ),
-              )
             ],
           ),
         ),
@@ -97,7 +130,13 @@ class _AppGalleyState extends State<AppGalley> {
               if (!appdata.hadLoad) {
                 return Container(
                   child: Center(
-                    child: Text("Loading..."),
+                    child: Text(
+                      "Loading...",
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline3
+                          ?.copyWith(color: Colors.white),
+                    ),
                   ),
                 );
               }

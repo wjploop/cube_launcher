@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/data/event.dart';
+import 'package:cube_launcher/screen/area_top_bottom.dart';
 import 'package:event_bus/event_bus.dart' show EventBus;
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -38,12 +38,18 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
   @override
   void initState() {
     super.initState();
+
+    context.read<EventBus>().on<RotateToEditEvent>().listen((e) {
+      setState(() {
+        widget.cube.rotateToConfig();
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<EditingState>(
-      builder: (context, edtingState, child) => GestureDetector(
+    return Consumer<MenuState>(
+      builder: (context, menuState, child) => GestureDetector(
         onPanStart: (DragStartDetails details) {
           if (!widget.touchable) {
             return;
@@ -69,13 +75,13 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
         onDoubleTap: () {
           setState(() {
             widget.cube.rotateToConfig();
-            edtingState.update(!edtingState.editing);
+            menuState.update(menuState.position, !menuState.edit);
           });
         },
         child: Container(
           color: Colors.transparent,
           child: CubeWidget(
-            editing: context.watch<EditingState>().editing,
+            editing: context.watch<MenuState>().edit,
             cube: getCube(),
           ),
         ),
@@ -166,7 +172,7 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
     if (_inAnimation) {
       return;
     }
-    if (context.read<EditingState>().editing) {
+    if (context.read<MenuState>().edit) {
       return;
     }
     RenderBox renderBox = context.findRenderObject() as RenderBox;
