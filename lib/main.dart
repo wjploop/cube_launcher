@@ -1,4 +1,5 @@
 import 'package:cube_launcher/components/app_state.dart';
+import 'package:cube_launcher/components/cube.dart';
 import 'package:cube_launcher/screen/area_top_bottom.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class App extends StatelessWidget {
               create: (context) => MenuState(MenuPosition.top, false),
             ),
             ChangeNotifierProvider(
-              create: (context) => FaceColorMap(Repo.map),
+              create: (context) => FaceColorMap(Repo.map, defaultColorMap),
             ),
           ],
           child: Scaffold(

@@ -63,15 +63,19 @@ class _AppGalleyState extends State<AppGalley> {
       state.update(state.position, !state.edit);
     }
 
+    void stateColorSelect() {
+      context.read<>()
+    }
+
     void emptyAction() {}
 
     var actionFun = action == MenuAction.action_arrow_up
         ? statePrev
         : action == MenuAction.action_arrow_down
-            ? stateNext
-            : action == MenuAction.action_editing_cube
-                ? stateEdit
-                : emptyAction;
+        ? stateNext
+        : action == MenuAction.action_editing_cube
+        ? stateEdit
+        : emptyAction;
 
     return IconButton(
         onPressed: () {

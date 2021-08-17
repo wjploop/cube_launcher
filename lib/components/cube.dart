@@ -8,6 +8,16 @@ enum FaceColor { YELLOW, GREEN, WHITE, BLUE, RED, ORANGE, BLACK }
 enum Face { BACK, LEFT, TOP, FRONT, RIGHT, DOWN }
 enum Corner { TL, BL, BR, TR }
 
+const Map<FaceColor, Color> defaultColorMap = {
+  FaceColor.YELLOW: Colors.yellow,
+  FaceColor.GREEN: Colors.green,
+  FaceColor.WHITE: Colors.white,
+  FaceColor.BLUE: Colors.blue,
+  FaceColor.RED: Colors.red,
+  FaceColor.ORANGE: Colors.orange,
+  FaceColor.BLACK: Colors.black,
+};
+
 class Cube {
   final double pieceSize;
   final double rotateRatio;

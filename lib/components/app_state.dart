@@ -13,19 +13,29 @@ class AppData with ChangeNotifier {
 }
 
 class FaceColorMap with ChangeNotifier {
-  Map<FaceColor, List<AppInfo?>>? map;
+  Map<FaceColor, List<AppInfo?>>? appMap;
+  Map<FaceColor, Color> colorMap;
 
-  FaceColorMap(this.map);
+  FaceColorMap(this.appMap, this.colorMap);
 
-  void update(Map<FaceColor, List<AppInfo?>>? map) {
-    this.map = map;
+  void updateApp(
+      Map<FaceColor, List<AppInfo?>>? appMap, Map<FaceColor, Color> colorMap) {
+    this.appMap = appMap;
+    this.colorMap = colorMap;
+    notifyListeners();
+  }
+
+  void updateColor(
+      Map<FaceColor, List<AppInfo?>>? appMap, Map<FaceColor, Color> colorMap) {
+    this.appMap = appMap;
+    this.colorMap = colorMap;
     notifyListeners();
   }
 
   @override
   bool operator ==(Object other) {
     if ((other is FaceColorMap)) {
-      return map == other.map;
+      return appMap == other.appMap;
     }
     return false;
   }
@@ -33,4 +43,3 @@ class FaceColorMap with ChangeNotifier {
   @override
   int get hashCode => super.hashCode;
 }
-

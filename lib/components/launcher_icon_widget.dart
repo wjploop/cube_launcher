@@ -28,7 +28,7 @@ class LauncherIconWidget extends StatelessWidget {
       );
     }
     return Consumer<FaceColorMap>(builder: (context, map, child) {
-      var currentFace = map.map?[faceColor]!;
+      var currentFace = map.appMap?[faceColor]!;
 
       var app = currentFace![positionInAFace];
 
@@ -61,8 +61,8 @@ class LauncherIconWidget extends StatelessWidget {
                 },
                 onAccept: (data) {
                   currentFace[positionInAFace] = data;
-                  map.map?[faceColor] = currentFace;
-                  context.read<FaceColorMap>().update(map.map);
+                  map.appMap?[faceColor] = currentFace;
+                  context.read<FaceColorMap>().updateApp(map.appMap, map);
                 },
               ),
             )
@@ -80,8 +80,8 @@ class LauncherIconWidget extends StatelessWidget {
                         onTap: () {
                           // 将该app移除
                           currentFace[positionInAFace] = null;
-                          map.map?[faceColor] = currentFace;
-                          context.read<FaceColorMap>().update(map.map);
+                          map.appMap?[faceColor] = currentFace;
+                          context.read<FaceColorMap>().updateApp(map.appMap);
                         },
                         child: Container(
                           margin: EdgeInsets.all(4),
