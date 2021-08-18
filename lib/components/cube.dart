@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:cube_launcher/data/calculator.dart';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart'
     show Vector3, Vector2, Matrix3, Matrix4;
@@ -57,9 +58,23 @@ class Cube {
   }
 
   void rotateToConfig() {
+    var angelx = angelX(cameraTransform);
+    var angely = angelY(cameraTransform);
+    print('angel y $angely');
+
+    var angelz = angelZ(cameraTransform);
     cameraTransform
       ..setIdentity()
-      ..setEntry(3, 2, -0.0015); // 仅仅是设置 z 轴视觉高度，越远越小的效果
+      ..setEntry(3, 2, -0.0015)
+      ..rotateX(angelx)
+      ..rotateY(angely);
+    // cameraTransform.rotateY(-angely);
+    // cameraTransform.rotateZ(angelz);
+
+    // cameraTransform
+    // ..setIdentity()
+    // ..setEntry(3, 2, -0.0015); // 仅仅是设置 z 轴视觉高度，越远越小的效果
+    // ..rotateZ(0);
     cameraChanged();
   }
 
@@ -69,8 +84,8 @@ class Cube {
       ..setIdentity()
       ..setEntry(3, 2, -0.0015)
       // from https://medium.com/flutter-io/perspective-on-flutter-6f832f4d912e
-      ..rotate(Vector3(0.0, 1.0, 0.0), -math.pi / 4) // rotate left 45c
-      ..rotate(Vector3(1.0, 0.0, -1.0), -math.pi / 8); // show the orange face
+      ..rotate(Vector3(0.0, 1.0, 0.0), -math.pi / 4); // rotate left 45c
+    // ..rotate(Vector3(1.0, 0.0, -1.0), -math.pi / 8); // show the orange face
     pieces.forEach((p) {
       p.reset();
       positionMap[p.position] = p;
