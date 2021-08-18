@@ -40,7 +40,7 @@ class LauncherIconWidget extends StatelessWidget {
             padding: EdgeInsets.all(10),
             child: Image.memory(
               app.icon,
-              color: colorMap[faceColor],
+              color: context.watch<FaceColorMap>().colorMap[faceColor],
               colorBlendMode: BlendMode.lighten,
             ),
           ),
@@ -62,7 +62,9 @@ class LauncherIconWidget extends StatelessWidget {
                 onAccept: (data) {
                   currentFace[positionInAFace] = data;
                   map.appMap?[faceColor] = currentFace;
-                  context.read<FaceColorMap>().updateApp(map.appMap, map);
+                  context.read<FaceColorMap>().updateApp(
+                        map.appMap,
+                      );
                 },
               ),
             )
@@ -81,7 +83,9 @@ class LauncherIconWidget extends StatelessWidget {
                           // 将该app移除
                           currentFace[positionInAFace] = null;
                           map.appMap?[faceColor] = currentFace;
-                          context.read<FaceColorMap>().updateApp(map.appMap);
+                          context.read<FaceColorMap>().updateApp(
+                                map.appMap,
+                              );
                         },
                         child: Container(
                           margin: EdgeInsets.all(4),
@@ -106,7 +110,7 @@ class LauncherIconWidget extends StatelessWidget {
 
       var icon = Container(
         decoration: BoxDecoration(
-            color: colorMap[faceColor],
+            color: context.watch<FaceColorMap>().colorMap[faceColor],
             border: Border.all(color: Colors.black, width: 1)),
         child: appIcon,
       );
@@ -125,13 +129,3 @@ class LauncherIconWidget extends StatelessWidget {
     });
   }
 }
-
-var colorMap = {
-  FaceColor.YELLOW: Colors.yellow,
-  FaceColor.GREEN: Colors.green,
-  FaceColor.WHITE: Colors.white,
-  FaceColor.BLUE: Colors.blue,
-  FaceColor.RED: Colors.redAccent,
-  FaceColor.ORANGE: Colors.orange,
-  FaceColor.BLACK: Colors.black,
-};

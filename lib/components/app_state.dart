@@ -18,16 +18,12 @@ class FaceColorMap with ChangeNotifier {
 
   FaceColorMap(this.appMap, this.colorMap);
 
-  void updateApp(
-      Map<FaceColor, List<AppInfo?>>? appMap, Map<FaceColor, Color> colorMap) {
+  void updateApp(Map<FaceColor, List<AppInfo?>>? appMap) {
     this.appMap = appMap;
-    this.colorMap = colorMap;
     notifyListeners();
   }
 
-  void updateColor(
-      Map<FaceColor, List<AppInfo?>>? appMap, Map<FaceColor, Color> colorMap) {
-    this.appMap = appMap;
+  void updateColor(Map<FaceColor, Color> colorMap) {
     this.colorMap = colorMap;
     notifyListeners();
   }
