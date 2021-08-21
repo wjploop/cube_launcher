@@ -115,11 +115,19 @@ class MenuState with ChangeNotifier {
   MenuPosition position;
   bool edit;
 
+  // 默认翻转到 front
+  FaceColor editFace = FaceColor.RED;
+
   MenuState(this.position, this.edit);
 
   void update(MenuPosition position, bool edit) {
     this.edit = edit;
     this.position = position;
+    notifyListeners();
+  }
+
+  void updateEditFace(FaceColor faceColor) {
+    this.editFace = faceColor;
     notifyListeners();
   }
 

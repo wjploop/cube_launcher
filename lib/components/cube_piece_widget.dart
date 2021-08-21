@@ -1,8 +1,6 @@
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-
-import 'dart:ui' as ui;
 
 import 'cube.dart';
 import 'launcher_icon_widget.dart';
@@ -46,7 +44,6 @@ class CubeLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(ui.Size size) {
-    print('cube size $size');
     var center = size.center(Offset.zero);
     cube.orderedPaintSurfaces.forEach((PieceSurface ps) {
       var id = ps.piece.toString() + ps.face.toString();

@@ -9,6 +9,30 @@ enum FaceColor { YELLOW, GREEN, WHITE, BLUE, RED, ORANGE, BLACK }
 enum Face { BACK, LEFT, TOP, FRONT, RIGHT, DOWN }
 enum Corner { TL, BL, BR, TR }
 
+class FaceColorDir {
+  final FaceColor left;
+  final FaceColor right;
+  final FaceColor up;
+  final FaceColor down;
+
+  FaceColorDir(this.left, this.right, this.up, this.down);
+}
+
+var faceColorDirs = {
+  FaceColor.YELLOW: FaceColorDir(
+      FaceColor.GREEN, FaceColor.BLUE, FaceColor.WHITE, FaceColor.YELLOW),
+  FaceColor.GREEN: FaceColorDir(
+      FaceColor.GREEN, FaceColor.BLUE, FaceColor.WHITE, FaceColor.YELLOW),
+  FaceColor.WHITE: FaceColorDir(
+      FaceColor.GREEN, FaceColor.BLUE, FaceColor.WHITE, FaceColor.YELLOW),
+  FaceColor.BLUE: FaceColorDir(
+      FaceColor.GREEN, FaceColor.BLUE, FaceColor.WHITE, FaceColor.YELLOW),
+  FaceColor.RED: FaceColorDir(
+      FaceColor.GREEN, FaceColor.BLUE, FaceColor.WHITE, FaceColor.YELLOW),
+  FaceColor.ORANGE: FaceColorDir(
+      FaceColor.GREEN, FaceColor.BLUE, FaceColor.WHITE, FaceColor.YELLOW),
+};
+
 const Map<FaceColor, Color> defaultColorMap = {
   FaceColor.YELLOW: Colors.yellow,
   FaceColor.GREEN: Colors.green,
@@ -60,21 +84,14 @@ class Cube {
   void rotateToConfig() {
     var angelx = angelX(cameraTransform);
     var angely = angelY(cameraTransform);
-    print('angel y $angely');
 
-    var angelz = angelZ(cameraTransform);
+    // cameraTransform.rotate(Vector3(0,1,0), math.pi/2);
+
     cameraTransform
       ..setIdentity()
-      ..setEntry(3, 2, -0.0015)
-      ..rotateX(angelx)
-      ..rotateY(angely);
-    // cameraTransform.rotateY(-angely);
-    // cameraTransform.rotateZ(angelz);
-
-    // cameraTransform
-    // ..setIdentity()
-    // ..setEntry(3, 2, -0.0015); // 仅仅是设置 z 轴视觉高度，越远越小的效果
-    // ..rotateZ(0);
+      ..setEntry(3, 2, -0.0015); // 仅仅是设置 z 轴视觉高度，越远越小的效果
+    // ..rotate(Vector3(0.0, 1.0, 0.0), -math.pi / 4) // rotate left 45c
+    // ..rotate(Vector3(1.0, 0.0, -1.0), -math.pi / 8);
     cameraChanged();
   }
 

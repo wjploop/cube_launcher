@@ -36,7 +36,7 @@ class App extends StatelessWidget {
               create: (context) => MenuState(MenuPosition.top, false),
             ),
             ChangeNotifierProvider(
-              create: (context) => FaceColorMap(Repo.map, defaultColorMap),
+              create: (context) => FaceMap(Repo.map, defaultColorMap),
             ),
           ],
           child: Scaffold(

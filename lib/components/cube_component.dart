@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:cube_launcher/data/event.dart';
+import 'package:cube_launcher/data/matrix3_process.dart';
 import 'package:cube_launcher/screen/area_top_bottom.dart';
 import 'package:event_bus/event_bus.dart' show EventBus;
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
-import 'package:vector_math/vector_math_64.dart' show Vector3;
+import 'package:vector_math/vector_math_64.dart' show Matrix3, Vector3;
 
 import 'cube.dart';
 import 'cube_piece_widget.dart';
@@ -168,11 +169,20 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
 
   Future<void> restoreCamera() async {}
 
+  List<double> editingStartXY = [0, 0];
+  bool editStartScroll = false;
+  final int SCROLL_DISTANCE = 4;
+  var scrollAxisType = -1;
+  var scrollAxis = [Vector3(1, 0, 0), Vector3(0, 1, 0)];
+  var scrollAngle = 0.0;
+
   void onPanStart(DragStartDetails details) {
     if (_inAnimation) {
       return;
     }
     if (context.read<MenuState>().edit) {
+      editingStartXY.fillRange(0, 2, 0);
+      scrollAngle = 0.0;
       return;
     }
     RenderBox renderBox = context.findRenderObject() as RenderBox;
@@ -193,6 +203,43 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
   Future<void> onPanEnd(DragEndDetails details) async {
     if (_inAnimation) {
       return;
+    }
+    if (editStartScroll) {
+      editStartScroll = false;
+      // 自然滚动到标准角度
+      var currentAngle = scrollAngle % (math.pi / 2.0);
+      var remainAngel;
+      if (currentAngle > 0) {
+        remainAngel = currentAngle > (math.pi / 4.0)
+            ? math.pi / 2.0 - currentAngle
+            : -currentAngle;
+      } else {
+        remainAngel = currentAngle.abs() > (math.pi / 4.0)
+            ? -(math.pi / 2.0 - currentAngle.abs())
+            : currentAngle;
+      }
+      scrollAngle += remainAngel;
+
+      setState(() {
+        // todo 替换成动画
+        getCube()
+            .cameraMovedOnRelative(scrollAxis[scrollAxisType], remainAngel);
+        // 当前显示的是哪个面？
+        // 一个面会有4种状态？6个面，这样会有24种状态
+        //
+        var rotation = getCube().cameraTransform.getRotation();
+        print(standardMatrix3Format(rotation));
+        var str = standardMatrix3(rotation);
+        FaceColor endColor = FaceColor.BLACK;
+        standardRotation.forEach((key, value) {
+          if (value.contains(str.replaceAll("\n", ""))) {
+            endColor = key;
+          }
+        });
+        assert(endColor != FaceColor.BLACK);
+        print('end color $endColor');
+        context.read<MenuState>().updateEditFace(endColor);
+      });
     }
     // move is done
     if (totalAngle != 0) {
@@ -221,6 +268,39 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
     final dy = details.delta.dy;
 
     if (dx == 0 && dy == 0) {
+      return;
+    }
+    if (context.read<MenuState>().edit) {
+      // 只允许左右移动，上下移动
+      editingStartXY[0] += dx;
+      editingStartXY[1] += dy;
+      var needStartDelta = false;
+
+      if (!editStartScroll) {
+        // 检测应该绕哪个轴滚动
+        if (editingStartXY[0].abs() > SCROLL_DISTANCE) {
+          // 绕Y轴
+          editStartScroll = true;
+          scrollAxisType = 1;
+        } else if (editingStartXY[1].abs() > SCROLL_DISTANCE) {
+          // 绕X轴
+          scrollAxisType = 0;
+          editStartScroll = true;
+        }
+        needStartDelta = true;
+      } else {
+        // 开始转动
+        var distance = scrollAxisType == 1 ? dx : -dy;
+        if (needStartDelta) {
+          distance +=
+              (scrollAxisType == 1 ? editingStartXY[0] : -editingStartXY[1]);
+        }
+        var angle = distance * getCube().rotateRatio;
+        scrollAngle += angle;
+        setState(() {
+          getCube().cameraMovedOnRelative(scrollAxis[scrollAxisType], angle);
+        });
+      }
       return;
     }
 

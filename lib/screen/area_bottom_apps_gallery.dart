@@ -66,7 +66,7 @@ class _AppGalleyState extends State<AppGalley> {
     }
 
     void stateColorSelect() async {
-      var faceColorMap = context.read<FaceColorMap>();
+      var faceColorMap = context.read<FaceMap>();
 
       final Color colorBeforeDialog = faceColorMap.colorMap[FaceColor.RED]!;
       if (!(await colorPickerDialog())) {
@@ -94,7 +94,7 @@ class _AppGalleyState extends State<AppGalley> {
   }
 
   void updateFaceColor(FaceColor face, Color color) {
-    var faceColorMap = context.read<FaceColorMap>();
+    var faceColorMap = context.read<FaceMap>();
     var colorMap = faceColorMap.colorMap;
     var newMap = Map.of(colorMap)..[face] = color;
     faceColorMap.updateColor(newMap);
@@ -102,10 +102,12 @@ class _AppGalleyState extends State<AppGalley> {
 
   Future<bool> colorPickerDialog() async {
     return ColorPicker(
-      color:
-          context.read<FaceColorMap>().colorMap[FaceColor.RED] ?? Colors.yellow,
+      color: context
+              .read<FaceMap>()
+              .colorMap[context.read<MenuState>().editFace] ??
+          Colors.yellow,
       onColorChanged: (Color color) {
-        updateFaceColor(FaceColor.RED, color);
+        updateFaceColor(context.read<MenuState>().editFace, color);
       },
       width: 40,
       height: 40,
@@ -113,6 +115,7 @@ class _AppGalleyState extends State<AppGalley> {
       spacing: 5,
       runSpacing: 5,
       wheelDiameter: 155,
+      crossAxisAlignment: CrossAxisAlignment.end,
       heading: Text(
         'Select color',
         style: Theme.of(context).textTheme.subtitle1,
@@ -130,8 +133,7 @@ class _AppGalleyState extends State<AppGalley> {
       customColorSwatchesAndNames: colorsNameMap,
     ).showPickerDialog(
       context,
-      constraints:
-          const BoxConstraints(minHeight: 320, minWidth: 300, maxWidth: 320),
+      constraints: const BoxConstraints(minHeight: 320, minWidth: 300),
     );
   }
 

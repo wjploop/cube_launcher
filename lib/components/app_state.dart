@@ -12,11 +12,11 @@ class AppData with ChangeNotifier {
   }
 }
 
-class FaceColorMap with ChangeNotifier {
+class FaceMap with ChangeNotifier {
   Map<FaceColor, List<AppInfo?>>? appMap;
   Map<FaceColor, Color> colorMap;
 
-  FaceColorMap(this.appMap, this.colorMap);
+  FaceMap(this.appMap, this.colorMap);
 
   void updateApp(Map<FaceColor, List<AppInfo?>>? appMap) {
     this.appMap = appMap;
@@ -30,7 +30,7 @@ class FaceColorMap with ChangeNotifier {
 
   @override
   bool operator ==(Object other) {
-    if ((other is FaceColorMap)) {
+    if ((other is FaceMap)) {
       return appMap == other.appMap;
     }
     return false;
