@@ -1,14 +1,16 @@
 import 'dart:math';
 
 import 'package:cube_launcher/components/app_state.dart';
+import 'package:cube_launcher/components/color_picker.dart';
 import 'package:cube_launcher/components/cube.dart';
 import 'package:cube_launcher/components/cube_component.dart';
 import 'package:cube_launcher/screen/area_bottom_apps_gallery.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-const menuHeight = 46;
+const menuHeight = 46.0;
 
 class AreaTopBottom extends StatefulWidget {
   const AreaTopBottom({Key? key}) : super(key: key);
@@ -31,6 +33,8 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
     return LayoutBuilder(
       builder: (context, constraints) {
         var screenSize = Size(constraints.maxWidth, constraints.maxHeight);
+        // screenSize = Size(screenSize.width,screenSize.height - statusHeight);
+
         var topAreaHeight = min(screenSize.width, screenSize.height);
 
         print('screen size $screenSize');
@@ -67,6 +71,14 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
           }
         }
 
+        double faceColorPickerTop(bool editingFaceColor) {
+          if (editingFaceColor) {
+            return screenSize.height + menuHeight - topAreaHeight;
+          } else {
+            return screenSize.height;
+          }
+        }
+
         return GestureDetector(
           onDoubleTap: () {},
           child: Consumer<AppData>(
@@ -78,12 +90,12 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                 )),
                 child: Builder(
                   builder: (context) {
-                    var menuPosition = context.watch<MenuState>().position;
+                    var menuState = context.watch<MenuState>();
                     return Stack(
                       children: [
                         AnimatedPositioned(
                             duration: Duration(milliseconds: 500),
-                            top: cubeTop(menuPosition),
+                            top: cubeTop(menuState.position),
                             child: Container(
                                 constraints: BoxConstraints.tight(
                                     Size(screenSize.width, topAreaHeight)),
@@ -94,12 +106,21 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                                   eventBus: eventBus,
                                 ))),
                         AnimatedPositioned(
-                            top: galleryTop(menuPosition),
+                            top: galleryTop(menuState.position),
                             duration: Duration(milliseconds: 500),
                             child: SizedBox.fromSize(
                               size: screenSize,
                               child: AppGalley(),
-                            ))
+                            )),
+                        AnimatedPositioned(
+                            top: faceColorPickerTop(menuState.editingFaceColor),
+                            child: SizedBox.fromSize(
+                              size: Size(screenSize.width,
+                                  screenSize.height - topAreaHeight),
+                              child: Container(
+                                  color: Colors.blue, child: FaceColorPicker()),
+                            ),
+                            duration: Duration(milliseconds: 500))
                       ],
                     );
                   },
@@ -113,16 +134,22 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
 
 class MenuState with ChangeNotifier {
   MenuPosition position;
-  bool edit;
+  bool editingApp;
+
+  bool editting() => editingApp | editingFaceColor;
 
   // 默认翻转到 front
   FaceColor editFace = FaceColor.RED;
 
-  MenuState(this.position, this.edit);
+  // 是否正在编辑魔方页面
+  bool editingFaceColor = false;
+
+  MenuState(this.position, this.editingApp);
 
   void update(MenuPosition position, bool edit) {
-    this.edit = edit;
+    this.editingApp = edit;
     this.position = position;
+    editingFaceColor = false;
     notifyListeners();
   }
 
@@ -131,18 +158,27 @@ class MenuState with ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleEditFaceColor() {
+    this.editingFaceColor = !editingFaceColor;
+    notifyListeners();
+  }
+
   List<MenuAction> actions() {
+    if (editingFaceColor) {
+      return [MenuAction.action_choose_color];
+    }
+    if (editingApp) {
+      return [MenuAction.action_editing_cube];
+    }
     List<MenuAction> actions = [];
     switch (position) {
       case MenuPosition.top:
         actions.addAll({MenuAction.action_arrow_down});
         break;
       case MenuPosition.middle:
-        if (edit) {
-          actions.add(MenuAction.action_choose_color);
-        }
         actions.addAll({
           MenuAction.action_editing_cube,
+          MenuAction.action_choose_color,
           MenuAction.action_arrow_up,
           MenuAction.action_arrow_down
         });

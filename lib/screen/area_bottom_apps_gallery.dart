@@ -62,16 +62,19 @@ class _AppGalleyState extends State<AppGalley> {
 
     void stateEdit() {
       context.read<EventBus>().fire(RotateToEditEvent());
-      state.update(state.position, !state.edit);
+      state.update(state.position, !state.editingApp);
     }
 
     void stateColorSelect() async {
-      var faceColorMap = context.read<FaceMap>();
+      context.read<EventBus>().fire(RotateToEditEvent());
 
-      final Color colorBeforeDialog = faceColorMap.colorMap[FaceColor.RED]!;
-      if (!(await colorPickerDialog())) {
-        updateFaceColor(FaceColor.RED, colorBeforeDialog);
-      }
+      // var faceColorMap = context.read<FaceMap>();
+      //
+      // final Color colorBeforeDialog = faceColorMap.colorMap[FaceColor.RED]!;
+      // if (!(await colorPickerDialog())) {
+      //   updateFaceColor(FaceColor.RED, colorBeforeDialog);
+      // }
+      context.read<MenuState>().toggleEditFaceColor();
     }
 
     void emptyAction() {}
@@ -115,16 +118,15 @@ class _AppGalleyState extends State<AppGalley> {
       spacing: 5,
       runSpacing: 5,
       wheelDiameter: 155,
-      crossAxisAlignment: CrossAxisAlignment.end,
       heading: Text(
         'Select color',
         style: Theme.of(context).textTheme.subtitle1,
       ),
-      pickerTypeLabels: {ColorPickerType.primary: "主要"},
-      actionButtons: ColorPickerActionButtons(),
+      actionButtons: ColorPickerActionButtons(
+          closeButton: true, dialogActionButtons: false),
       pickersEnabled: const <ColorPickerType, bool>{
         ColorPickerType.both: false,
-        ColorPickerType.primary: true,
+        ColorPickerType.primary: false,
         ColorPickerType.accent: false,
         ColorPickerType.bw: false,
         ColorPickerType.custom: false,
@@ -142,7 +144,7 @@ class _AppGalleyState extends State<AppGalley> {
     return Column(
       children: [
         Container(
-          height: 46,
+          height: menuHeight,
           color: Colors.deepPurple,
           child: Stack(
             children: [

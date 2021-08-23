@@ -76,13 +76,13 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
         onDoubleTap: () {
           setState(() {
             widget.cube.rotateToConfig();
-            menuState.update(menuState.position, !menuState.edit);
+            menuState.update(menuState.position, !menuState.editingApp);
           });
         },
         child: Container(
           color: Colors.transparent,
           child: CubeWidget(
-            editing: context.watch<MenuState>().edit,
+            editing: context.watch<MenuState>().editingApp,
             cube: getCube(),
           ),
         ),
@@ -180,7 +180,7 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
     if (_inAnimation) {
       return;
     }
-    if (context.read<MenuState>().edit) {
+    if (context.read<MenuState>().editting()) {
       editingStartXY.fillRange(0, 2, 0);
       scrollAngle = 0.0;
       return;
@@ -270,7 +270,7 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
     if (dx == 0 && dy == 0) {
       return;
     }
-    if (context.read<MenuState>().edit) {
+    if (context.read<MenuState>().editting()) {
       // 只允许左右移动，上下移动
       editingStartXY[0] += dx;
       editingStartXY[1] += dy;
