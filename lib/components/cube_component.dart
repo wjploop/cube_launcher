@@ -143,7 +143,7 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
 
     fullFaceController = AnimationController(
       vsync: getVSync(),
-      duration: Duration(milliseconds: 100),
+      duration: Duration(milliseconds: 500),
       animationBehavior: AnimationBehavior.preserve,
     );
 
@@ -273,7 +273,7 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
       // 注意target正值，否则current.value > target 则会判断不必执行动画了
       //
       await fullFaceController.animateTo(scrollTargetSign * remainAngel,
-          curve: Curves.easeIn);
+          curve: Curves.ease);
       _inAnimation = false;
     }
     // move is done
