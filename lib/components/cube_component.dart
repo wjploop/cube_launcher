@@ -11,7 +11,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
-import 'package:vector_math/vector_math_64.dart' show Matrix3, Vector3;
+import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'cube.dart';
 import 'cube_piece_widget.dart';
@@ -118,15 +118,68 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
 
   bool _inAnimation = false;
 
+  //编辑状态的旋转
+  List<double> editingStartXY = [0, 0];
+  bool editStartScroll = false;
+  final SCROLL_DISTANCE = 4;
+  var scrollAxisType = -1;
+  var scrollAxis = [Vector3(1, 0, 0), Vector3(0, 1, 0)];
+  var scrollAngle = 0.0;
+  late AnimationController fullFaceController;
+  var scrollLastValue = 0.0;
+  var scrollTargetValue = 0.0;
+  double scrollTargetSign = 1;
+
   @override
   void dispose() {
     faceController.dispose();
+    fullFaceController.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+
+    fullFaceController = AnimationController(
+      vsync: getVSync(),
+      duration: Duration(milliseconds: 100),
+      animationBehavior: AnimationBehavior.preserve,
+    );
+
+    fullFaceController.addListener(() {
+      setState(() {
+        var diff = fullFaceController.value - scrollLastValue;
+        print('value faceController.value ${fullFaceController.value}');
+        getCube().cameraMovedOnRelative(
+            scrollAxis[scrollAxisType], scrollTargetSign * diff);
+        print('diff = $diff');
+
+        scrollLastValue = fullFaceController.value;
+      });
+    });
+    fullFaceController.addStatusListener((status) {
+      print('full anim status $status');
+      if (status == AnimationStatus.completed) {
+        // 当前显示的是哪个面？
+        // 一个面会有4种状态？6个面，这样会有24种状态
+        //
+        setState(() {
+          var rotation = getCube().cameraTransform.getRotation();
+          // print(standardMatrix3Format(rotation));
+          var str = standardMatrix3(rotation);
+          FaceColor endColor = FaceColor.BLACK;
+          standardRotation.forEach((key, value) {
+            if (value.contains(str.replaceAll("\n", ""))) {
+              endColor = key;
+            }
+          });
+          // assert(endColor != FaceColor.BLACK);
+          print('end color $endColor');
+          context.read<MenuState>().updateEditFace(endColor);
+        });
+      }
+    });
 
     faceController = AnimationController(
       vsync: getVSync(),
@@ -168,13 +221,6 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
   }
 
   Future<void> restoreCamera() async {}
-
-  List<double> editingStartXY = [0, 0];
-  bool editStartScroll = false;
-  final int SCROLL_DISTANCE = 4;
-  var scrollAxisType = -1;
-  var scrollAxis = [Vector3(1, 0, 0), Vector3(0, 1, 0)];
-  var scrollAngle = 0.0;
 
   void onPanStart(DragStartDetails details) {
     if (_inAnimation) {
@@ -219,27 +265,16 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
             : currentAngle;
       }
       scrollAngle += remainAngel;
+      print('remain angel $remainAngel');
 
-      setState(() {
-        // todo 替换成动画
-        getCube()
-            .cameraMovedOnRelative(scrollAxis[scrollAxisType], remainAngel);
-        // 当前显示的是哪个面？
-        // 一个面会有4种状态？6个面，这样会有24种状态
-        //
-        var rotation = getCube().cameraTransform.getRotation();
-        print(standardMatrix3Format(rotation));
-        var str = standardMatrix3(rotation);
-        FaceColor endColor = FaceColor.BLACK;
-        standardRotation.forEach((key, value) {
-          if (value.contains(str.replaceAll("\n", ""))) {
-            endColor = key;
-          }
-        });
-        assert(endColor != FaceColor.BLACK);
-        print('end color $endColor');
-        context.read<MenuState>().updateEditFace(endColor);
-      });
+      scrollLastValue = 0;
+      _inAnimation = true;
+      scrollTargetSign = remainAngel > 0 ? 1 : -1;
+      // 注意target正值，否则current.value > target 则会判断不必执行动画了
+      //
+      await fullFaceController.animateTo(scrollTargetSign * remainAngel,
+          curve: Curves.easeIn);
+      _inAnimation = false;
     }
     // move is done
     if (totalAngle != 0) {
