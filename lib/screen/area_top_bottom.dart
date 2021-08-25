@@ -4,6 +4,7 @@ import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/components/color_picker.dart';
 import 'package:cube_launcher/components/cube.dart';
 import 'package:cube_launcher/components/cube_component.dart';
+import 'package:cube_launcher/components/wallpaper_picker.dart';
 import 'package:cube_launcher/screen/area_bottom_apps_gallery.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
@@ -79,6 +80,14 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
           }
         }
 
+        double wallpaperPickerTop(bool choosingWallpaper) {
+          if (choosingWallpaper) {
+            return screenSize.height / 3 * 2 - menuHeight;
+          } else {
+            return screenSize.height;
+          }
+        }
+
         return GestureDetector(
           onDoubleTap: () {},
           child: Consumer<AppData>(
@@ -86,7 +95,8 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                 decoration: BoxDecoration(
                     image: DecorationImage(
                   fit: BoxFit.cover,
-                  image: AssetImage("assets/images/cool_bg_1.jpg"),
+                  image: AssetImage(
+                      context.watch<AppData>().currentWallpaper.path),
                 )),
                 child: Builder(
                   builder: (context) {
@@ -106,6 +116,14 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                                   eventBus: eventBus,
                                 ))),
                         AnimatedPositioned(
+                            top: wallpaperPickerTop(menuState.pickingWallpaper),
+                            child: SizedBox.fromSize(
+                              size:
+                                  Size(screenSize.width, screenSize.height / 3),
+                              child: WallpaperPicker(),
+                            ),
+                            duration: Duration(milliseconds: 500)),
+                        AnimatedPositioned(
                             top: galleryTop(menuState.position),
                             duration: Duration(milliseconds: 500),
                             child: SizedBox.fromSize(
@@ -117,10 +135,9 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                             child: SizedBox.fromSize(
                               size: Size(screenSize.width,
                                   screenSize.height - topAreaHeight),
-                              child: Container(
-                                  color: Colors.blue, child: FaceColorPicker()),
+                              child: FaceColorPicker(),
                             ),
-                            duration: Duration(milliseconds: 500))
+                            duration: Duration(milliseconds: 500)),
                       ],
                     );
                   },
@@ -144,6 +161,8 @@ class MenuState with ChangeNotifier {
   // 是否正在编辑魔方页面
   bool editingFaceColor = false;
 
+  bool pickingWallpaper = false;
+
   MenuState(this.position, this.editingApp);
 
   void update(MenuPosition position, bool edit) {
@@ -163,7 +182,15 @@ class MenuState with ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleChoosingWallpaper() {
+    this.pickingWallpaper = !pickingWallpaper;
+    notifyListeners();
+  }
+
   List<MenuAction> actions() {
+    if (pickingWallpaper) {
+      return [MenuAction.action_choose_wallpaper];
+    }
     if (editingFaceColor) {
       return [MenuAction.action_choose_color];
     }
@@ -184,7 +211,8 @@ class MenuState with ChangeNotifier {
         });
         break;
       case MenuPosition.bottom:
-        actions.addAll({MenuAction.action_arrow_up});
+        actions.addAll(
+            {MenuAction.action_choose_wallpaper, MenuAction.action_arrow_up});
         break;
       default:
         break;
@@ -198,6 +226,7 @@ enum MenuAction {
   action_arrow_down,
   action_editing_cube,
   action_choose_color,
+  action_choose_wallpaper,
 }
 
 enum MenuPosition {

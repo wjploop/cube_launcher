@@ -43,7 +43,9 @@ class _AppGalleyState extends State<AppGalley> {
                 ? Icons.edit_rounded
                 : action == MenuAction.action_choose_color
                     ? Icons.color_lens_rounded
-                    : throw Exception("no support action");
+                    : action == MenuAction.action_choose_wallpaper
+                        ? Icons.wallpaper_rounded
+                        : throw Exception("no support action");
 
     void statePrev() {
       state.update(prev(state.position), false);
@@ -66,14 +68,11 @@ class _AppGalleyState extends State<AppGalley> {
 
     void stateColorSelect() async {
       context.read<EventBus>().fire(RotateToEditEvent());
-
-      // var faceColorMap = context.read<FaceMap>();
-      //
-      // final Color colorBeforeDialog = faceColorMap.colorMap[FaceColor.RED]!;
-      // if (!(await colorPickerDialog())) {
-      //   updateFaceColor(FaceColor.RED, colorBeforeDialog);
-      // }
       context.read<MenuState>().toggleEditFaceColor();
+    }
+
+    void stateWallpaperChoose() async {
+      context.read<MenuState>().toggleChoosingWallpaper();
     }
 
     void emptyAction() {}
@@ -86,7 +85,9 @@ class _AppGalleyState extends State<AppGalley> {
                 ? stateEdit
                 : action == MenuAction.action_choose_color
                     ? stateColorSelect
-                    : emptyAction;
+                    : action == MenuAction.action_choose_wallpaper
+                        ? stateWallpaperChoose
+                        : emptyAction;
 
     return IconButton(
         onPressed: () {
