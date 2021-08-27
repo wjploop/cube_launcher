@@ -11,6 +11,11 @@ class AppData with ChangeNotifier {
 
   Wallpaper currentWallpaper = built_in_wallpapers.first;
 
+  void updateWallpapers(List<Wallpaper> list) {
+    this.wallpapers = list;
+    notifyListeners();
+  }
+
   void updateCurrentWallpaper(Wallpaper wallpaper) {
     if (currentWallpaper == wallpaper) {
       return;

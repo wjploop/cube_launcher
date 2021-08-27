@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cube_launcher/components/app_state.dart';
@@ -5,6 +6,7 @@ import 'package:cube_launcher/components/color_picker.dart';
 import 'package:cube_launcher/components/cube.dart';
 import 'package:cube_launcher/components/cube_component.dart';
 import 'package:cube_launcher/components/wallpaper_picker.dart';
+import 'package:cube_launcher/data/Wallpaper.dart';
 import 'package:cube_launcher/screen/area_bottom_apps_gallery.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
@@ -91,57 +93,66 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
         return GestureDetector(
           onDoubleTap: () {},
           child: Consumer<AppData>(
-            builder: (context, appdata, child) => Container(
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: AssetImage(
-                      context.watch<AppData>().currentWallpaper.path),
-                )),
-                child: Builder(
-                  builder: (context) {
-                    var menuState = context.watch<MenuState>();
-                    return Stack(
-                      children: [
-                        AnimatedPositioned(
-                            duration: Duration(milliseconds: 500),
-                            top: cubeTop(menuState.position),
-                            child: Container(
-                                constraints: BoxConstraints.tight(
-                                    Size(screenSize.width, topAreaHeight)),
-                                height: topAreaHeight,
-                                child: PlayCubeWidget(
-                                  cube: cube,
-                                  touchable: true,
-                                  eventBus: eventBus,
-                                ))),
-                        AnimatedPositioned(
-                            top: wallpaperPickerTop(menuState.pickingWallpaper),
-                            child: SizedBox.fromSize(
-                              size:
-                                  Size(screenSize.width, screenSize.height / 3),
-                              child: WallpaperPicker(),
-                            ),
-                            duration: Duration(milliseconds: 500)),
-                        AnimatedPositioned(
-                            top: galleryTop(menuState.position),
-                            duration: Duration(milliseconds: 500),
-                            child: SizedBox.fromSize(
-                              size: screenSize,
-                              child: AppGalley(),
-                            )),
-                        AnimatedPositioned(
-                            top: faceColorPickerTop(menuState.editingFaceColor),
-                            child: SizedBox.fromSize(
-                              size: Size(screenSize.width,
-                                  screenSize.height - topAreaHeight),
-                              child: FaceColorPicker(),
-                            ),
-                            duration: Duration(milliseconds: 500)),
-                      ],
-                    );
-                  },
-                )),
+            builder: (context, appdata, child) {
+              var wallpaper = appdata.currentWallpaper;
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  wallpaper.type == WallpaperType.from_outer
+                      ? Image.file(
+                          File(wallpaper.path),
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(wallpaper.path, fit: BoxFit.cover),
+                  Container(child: Builder(
+                    builder: (context) {
+                      var menuState = context.watch<MenuState>();
+                      return Stack(
+                        children: [
+                          AnimatedPositioned(
+                              duration: Duration(milliseconds: 500),
+                              top: cubeTop(menuState.position),
+                              child: Container(
+                                  constraints: BoxConstraints.tight(
+                                      Size(screenSize.width, topAreaHeight)),
+                                  height: topAreaHeight,
+                                  child: PlayCubeWidget(
+                                    cube: cube,
+                                    touchable: true,
+                                    eventBus: eventBus,
+                                  ))),
+                          AnimatedPositioned(
+                              top: wallpaperPickerTop(
+                                  menuState.pickingWallpaper),
+                              child: SizedBox.fromSize(
+                                size: Size(
+                                    screenSize.width, screenSize.height / 3),
+                                child: WallpaperPicker(),
+                              ),
+                              duration: Duration(milliseconds: 500)),
+                          AnimatedPositioned(
+                              top: galleryTop(menuState.position),
+                              duration: Duration(milliseconds: 500),
+                              child: SizedBox.fromSize(
+                                size: screenSize,
+                                child: AppGalley(),
+                              )),
+                          AnimatedPositioned(
+                              top: faceColorPickerTop(
+                                  menuState.editingFaceColor),
+                              child: SizedBox.fromSize(
+                                size: Size(screenSize.width,
+                                    screenSize.height - topAreaHeight),
+                                child: FaceColorPicker(),
+                              ),
+                              duration: Duration(milliseconds: 500)),
+                        ],
+                      );
+                    },
+                  )),
+                ],
+              );
+            },
           ),
         );
       },
