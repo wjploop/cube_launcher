@@ -11,7 +11,7 @@ class FaceColorPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: Colors.deepPurple.shade50,
       child: ColorPicker(
         color: context
             .read<FaceMap>()

@@ -7,6 +7,7 @@ import 'package:cube_launcher/data/Repo.dart';
 import 'package:cube_launcher/data/event.dart';
 import 'package:cube_launcher/screen/area_top_bottom.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -45,7 +46,9 @@ class _AppGalleyState extends State<AppGalley> {
                     ? Icons.color_lens_rounded
                     : action == MenuAction.action_choose_wallpaper
                         ? Icons.wallpaper_rounded
-                        : throw Exception("no support action");
+                        : action == MenuAction.action_start_rotating
+                            ? Icons.rotate_right
+                            : throw Exception("no support action");
 
     void statePrev() {
       state.update(prev(state.position), false);
@@ -75,6 +78,11 @@ class _AppGalleyState extends State<AppGalley> {
       context.read<MenuState>().toggleChoosingWallpaper();
     }
 
+    void stateStartRotate() {
+      var menuState = context.read<MenuState>();
+      menuState.updatePlaying(!menuState.playing);
+    }
+
     void emptyAction() {}
 
     var actionFun = action == MenuAction.action_arrow_up
@@ -87,7 +95,9 @@ class _AppGalleyState extends State<AppGalley> {
                     ? stateColorSelect
                     : action == MenuAction.action_choose_wallpaper
                         ? stateWallpaperChoose
-                        : emptyAction;
+                        : action == MenuAction.action_start_rotating
+                            ? stateStartRotate
+                            : emptyAction;
 
     return IconButton(
         onPressed: () {
@@ -135,6 +145,12 @@ class _AppGalleyState extends State<AppGalley> {
                   IconButton(
                       onPressed: () {
                         setState(() {
+                          var menuState = context.read<MenuState>();
+                          if (menuState.editingApp ||
+                              menuState.editingFaceColor ||
+                              menuState.pickingWallpaper) {
+                            return;
+                          }
                           showAction = !showAction;
                         });
                       },
@@ -178,34 +194,89 @@ class _AppGalleyState extends State<AppGalley> {
   }
 }
 
-class GalleryItem extends StatelessWidget {
+class GalleryItem extends StatefulWidget {
   final AppInfo app;
 
   const GalleryItem({Key? key, required this.app}) : super(key: key);
 
   @override
+  _GalleryItemState createState() => _GalleryItemState();
+}
+
+class _GalleryItemState extends State<GalleryItem>
+    with SingleTickerProviderStateMixin {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  GlobalKey uninstallKey = GlobalKey();
+  GlobalKey appInfoKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
     var iconSize = screenSize.width / 5 - 26;
-    return LongPressDraggable(
-      data: app,
-      feedback: ClipOval(
-        child: Image.memory(
-          app.icon,
-          width: iconSize,
-          height: iconSize,
-        ),
-      ),
+    var itemWidget = GestureDetector(
+      onTap: () {
+        widget.app.rawApp.openApp();
+      },
+      onLongPress: () {
+        showDialog(
+          barrierColor: Colors.transparent,
+          context: context,
+          builder: (context) {
+            RenderBox renderBox = context.findRenderObject() as RenderBox;
+            var size = renderBox.size;
+            var position = renderBox.globalToLocal(Offset.zero);
+
+            print('size :$size');
+            print('position :$position');
+
+            return Container(
+              child: Wrap(children: [
+                Container(
+                  color: Colors.blue,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.delete_forever,
+                          color: Colors.white,
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "卸载",
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle1
+                              ?.copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ]),
+            );
+          },
+        );
+      },
       child: Container(
-        height: iconSize * 3,
+        height: iconSize * 2,
         width: iconSize,
         child: Center(
           child: Column(
             children: [
+              SizedBox(
+                height: 10,
+              ),
               Container(
                 child: ClipOval(
                   child: Image.memory(
-                    app.icon,
+                    widget.app.icon,
                     width: iconSize,
                     height: iconSize,
                   ),
@@ -216,7 +287,7 @@ class GalleryItem extends StatelessWidget {
               ),
               Container(
                 child: Text(
-                  "${app.name}",
+                  "${widget.app.name}",
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
@@ -231,9 +302,22 @@ class GalleryItem extends StatelessWidget {
         ),
       ),
     );
+    var draggableWidget = Draggable(
+      data: widget.app,
+      feedback: ClipOval(
+        child: Image.memory(
+          widget.app.icon,
+          width: iconSize,
+          height: iconSize,
+        ),
+      ),
+      child: Container(
+          decoration: BoxDecoration(
+              color: Colors.white24, borderRadius: BorderRadius.circular(8)),
+          child: itemWidget),
+    );
+    var editingApp = context.read<MenuState>().editingApp;
+
+    return editingApp ? draggableWidget : itemWidget;
   }
 }
-
-// Define some custom colors for the custom picker segment.
-// The 'guide' color values are from
-// https://material.io/design/color/the-color-system.html#color-theme-creation

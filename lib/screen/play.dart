@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'dart:math' as math;
 import 'dart:math';
 
 import 'package:cube_launcher/components/cube.dart';
@@ -23,36 +21,15 @@ class PlayScreenState extends State<PlayScreen>
 
   EventBus eventBus = EventBus();
 
-  late AnimationController shuffleController;
 
   bool inAnimation = false;
   late double animationLastAngle;
   late Vector3 animationAxis;
   late List<CubePiece> animationPieces;
 
-  bool waitInitShuffle = true;
-  bool showFinished = false;
-
   @override
   void initState() {
     super.initState();
-
-    shuffleController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      upperBound: math.pi / 2,
-      vsync: this,
-    );
-    shuffleController.addListener(() {
-      setState(() {
-        cube.rotatePieces(
-          animationAxis,
-          animationPieces,
-          shuffleController.value - animationLastAngle,
-        );
-        animationLastAngle = shuffleController.value;
-        // The state that has changed here is the animation object’s value.
-      });
-    });
 
     WidgetsBinding.instance?.addPostFrameCallback(_afterLayout);
 
@@ -77,42 +54,6 @@ class PlayScreenState extends State<PlayScreen>
 
     setState(() {});
 
-    // await shuffle();
-
-    setState(() {
-      waitInitShuffle = false;
-    });
-  }
-
-  Future<Null> shuffle([int steps = 20]) async {
-    if (inAnimation) {
-      return;
-    }
-    inAnimation = true;
-    while (steps > 0) {
-      steps--;
-
-      final rng = math.Random();
-      animationAxis = Vector3.all(0)..[rng.nextInt(3)] = 1;
-
-      final corners = const [0, 2, 6, 8, 18, 20, 24, 26];
-      final i = rng.nextInt(8);
-      final piece = cube.positionMap[corners[i]]!;
-      animationLastAngle = 0;
-      animationPieces = cube.findPiecesOnSamePlane(piece, animationAxis);
-
-      await shuffleController.forward(from: animationLastAngle);
-      cube.rotatePiecePositions(animationAxis, 1, animationPieces);
-    }
-    inAnimation = false;
-  }
-
-  @override
-  void dispose() {
-    shuffleController.stop();
-    shuffleController.dispose();
-
-    super.dispose();
   }
 
   @override
@@ -123,7 +64,6 @@ class PlayScreenState extends State<PlayScreen>
         builder: (context, constraints) => PlayCubeWidget(
           cube: cube,
           touchable: !inAnimation,
-          eventBus: eventBus,
         ),
       );
     } else {

@@ -21,10 +21,8 @@ const _90Degree = math.pi / 2;
 class PlayCubeWidget extends StatefulWidget {
   final Cube cube;
   final bool touchable;
-  final EventBus eventBus;
 
-  PlayCubeWidget(
-      {required this.cube, this.touchable = true, required this.eventBus});
+  PlayCubeWidget({required this.cube, this.touchable = true});
 
   double cubeAreaHeight() => cube.pieceSize * 6;
 
@@ -35,6 +33,8 @@ class PlayCubeWidget extends StatefulWidget {
 class _PlayCubeWidgetState extends State<PlayCubeWidget>
     with PlayCubeMixin, TickerProviderStateMixin {
   late AnimationController controller;
+  Ticker? autoPlayTicker;
+  double radian = 0;
 
   @override
   void initState() {
@@ -75,16 +75,24 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
         },
         onDoubleTap: () {
           setState(() {
-            widget.cube.rotateToConfig();
-            menuState.update(menuState.position, !menuState.editingApp);
+            if (menuState.position == MenuPosition.middle) {
+              widget.cube.rotateToConfig();
+              menuState.update(menuState.position, !menuState.editingApp);
+            } else if (menuState.position == MenuPosition.bottom) {
+              menuState.updatePlaying(!menuState.playing);
+            }
           });
         },
         child: Container(
           color: Colors.transparent,
-          child: CubeWidget(
-            editing: context.watch<MenuState>().editingApp,
-            cube: getCube(),
-          ),
+          child: context.select((MenuState menuState) => menuState.playing)
+              ? AutoPlayCubeWidget(
+                  cube: getCube(),
+                )
+              : CubeWidget(
+                  editing: context.watch<MenuState>().editingApp,
+                  cube: getCube(),
+                ),
         ),
       ),
     );
@@ -414,9 +422,8 @@ mixin PlayCubeMixin<T extends StatefulWidget> on State<T> {
 
 class AutoPlayCubeWidget extends StatefulWidget {
   final Cube cube;
-  final EventBus eventBus;
 
-  AutoPlayCubeWidget({required this.cube, required this.eventBus});
+  AutoPlayCubeWidget({required this.cube});
 
   @override
   _AutoPlayCubeWidgetState createState() => _AutoPlayCubeWidgetState();
@@ -442,7 +449,7 @@ class _AutoPlayCubeWidgetState extends State<AutoPlayCubeWidget>
 
     startTicker();
 
-    widget.eventBus.on<AutoPlayEvent>().listen((event) {
+    context.read<EventBus>().on<AutoPlayEvent>().listen((event) {
       if (event.play) {
         startTicker();
       } else {

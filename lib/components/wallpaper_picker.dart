@@ -27,8 +27,11 @@ class _WallpaperPickerState extends State<WallpaperPicker> {
                   var image = await ImagePicker().pickImage(
                     source: ImageSource.gallery,
                   );
+                  if (image == null) {
+                    return;
+                  }
                   var addedWallpaper =
-                      Wallpaper(WallpaperType.from_outer, image!.path);
+                      Wallpaper(WallpaperType.from_outer, image.path);
                   var appData = context.read<AppData>();
                   appData.updateWallpapers(appData.wallpapers
                     ..toList()

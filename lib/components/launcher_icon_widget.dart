@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/data/AppInfo.dart';
+import 'package:cube_launcher/screen/area_top_bottom.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -47,27 +48,8 @@ class LauncherIconWidget extends StatelessWidget {
         );
       }
 
-      var appIcon = app == null
-          ? Container(
-              child: DragTarget<AppInfo>(
-                onWillAccept: (data) {
-                  return true;
-                },
-                builder: (context, candidateData, rejectedData) {
-                  if (candidateData.isEmpty) {
-                    return Container();
-                  }
-                  return AppIcon(candidateData.first!);
-                },
-                onAccept: (data) {
-                  currentFace[positionInAFace] = data;
-                  map.appMap?[faceColor] = currentFace;
-                  context.read<FaceMap>().updateApp(
-                        map.appMap,
-                      );
-                },
-              ),
-            )
+      var appWidget = app == null
+          ? Container()
           : Stack(
               children: [
                 AppIcon(app),
@@ -108,19 +90,40 @@ class LauncherIconWidget extends StatelessWidget {
               ],
             );
 
+      var dragTarget = Container(
+        child: DragTarget<AppInfo>(
+          onWillAccept: (data) {
+            return true;
+          },
+          builder: (context, candidateData, rejectedData) {
+            if (candidateData.isEmpty) {
+              return appWidget;
+            }
+            return AppIcon(candidateData.first!);
+          },
+          onAccept: (data) {
+            currentFace[positionInAFace] = data;
+            map.appMap?[faceColor] = currentFace;
+            context.read<FaceMap>().updateApp(
+                  map.appMap,
+                );
+          },
+        ),
+      );
+
       var icon = Container(
         decoration: BoxDecoration(
             color: context.watch<FaceMap>().colorMap[faceColor],
             border: Border.all(color: Colors.black, width: 1)),
-        child: appIcon,
+        child: dragTarget,
       );
 
       return GestureDetector(
         onTap: () {
+          if (context.read<MenuState>().editting()) {
+            return;
+          }
           app?.rawApp.openApp();
-        },
-        onLongPress: () {
-          app?.rawApp.openSettingsScreen();
         },
         child: Container(
           child: icon,

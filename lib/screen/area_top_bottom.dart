@@ -31,131 +31,157 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
 
   bool loadingApp = true;
 
+  // 只有第一次加载回踩
+  bool firstLayout = true;
+
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        var screenSize = Size(constraints.maxWidth, constraints.maxHeight);
-        // screenSize = Size(screenSize.width,screenSize.height - statusHeight);
+    return
+        // screenSize == null?
+        LayoutBuilder(builder: (context, constraints) {
+      var screenSize = Size(constraints.maxWidth, constraints.maxHeight);
 
-        var topAreaHeight = min(screenSize.width, screenSize.height);
+      screenSize = Size(screenSize.width,
+          screenSize.height - MediaQuery.of(context).padding.top);
 
-        print('screen size $screenSize');
+      return content(screenSize);
+    });
+    // content(screenSize!);
+  }
 
-        var cubeSize = topAreaHeight / 6;
+  Widget content(Size screenSize) {
+    var topAreaWidth = min(screenSize.width, screenSize.height);
+    var topAreaHeight = screenSize.height - menuHeight;
 
-        cube = Cube(pieceSize: cubeSize);
+    print('screen size $screenSize');
 
-        EventBus eventBus = EventBus();
+    var cubeSize = topAreaWidth / 6;
 
-        double cubeTop(MenuPosition menuPosition) {
-          if (menuPosition == MenuPosition.top) {
-            return -topAreaHeight;
-          } else if (menuPosition == MenuPosition.middle) {
-            return 0;
-          }
-          if (menuPosition == MenuPosition.bottom) {
-            return (screenSize.height - menuHeight - topAreaHeight) / 2;
-          } else {
-            throw "No support menu position $menuPosition";
-          }
-        }
+    cube = Cube(pieceSize: cubeSize);
 
-        double galleryTop(MenuPosition menuPosition) {
-          if (menuPosition == MenuPosition.top) {
-            return 0;
-          } else if (menuPosition == MenuPosition.middle) {
-            return screenSize.height - topAreaHeight;
-          }
-          if (menuPosition == MenuPosition.bottom) {
-            return screenSize.height - menuHeight;
-          } else {
-            throw "No support menu position $menuPosition";
-          }
-        }
+    EventBus eventBus = EventBus();
 
-        double faceColorPickerTop(bool editingFaceColor) {
-          if (editingFaceColor) {
-            return screenSize.height + menuHeight - topAreaHeight;
-          } else {
-            return screenSize.height;
-          }
-        }
+    double cubeTop(MenuPosition menuPosition) {
+      if (menuPosition == MenuPosition.top) {
+        return -topAreaHeight;
+      } else if (menuPosition == MenuPosition.middle) {
+        return -(topAreaHeight - topAreaWidth) / 2;
+      } else if (menuPosition == MenuPosition.bottom) {
+        return (screenSize.height - menuHeight - topAreaHeight) / 2;
+      } else {
+        throw "No support menu position $menuPosition";
+      }
+    }
 
-        double wallpaperPickerTop(bool choosingWallpaper) {
-          if (choosingWallpaper) {
-            return screenSize.height / 3 * 2 - menuHeight;
-          } else {
-            return screenSize.height;
-          }
-        }
+    double galleryTop(MenuPosition menuPosition) {
+      if (menuPosition == MenuPosition.top) {
+        return 0;
+      } else if (menuPosition == MenuPosition.middle) {
+        return screenSize.height - topAreaWidth - menuHeight;
+      }
+      if (menuPosition == MenuPosition.bottom) {
+        return screenSize.height - menuHeight;
+      } else {
+        throw "No support menu position $menuPosition";
+      }
+    }
 
-        return GestureDetector(
-          onDoubleTap: () {},
-          child: Consumer<AppData>(
-            builder: (context, appdata, child) {
-              var wallpaper = appdata.currentWallpaper;
-              return Stack(
-                fit: StackFit.expand,
+    double faceColorPickerTop(bool editingFaceColor) {
+      if (editingFaceColor) {
+        return screenSize.height - topAreaWidth;
+      } else {
+        return screenSize.height;
+      }
+    }
+
+    double wallpaperPickerTop(bool choosingWallpaper) {
+      if (choosingWallpaper) {
+        return screenSize.height / 3 * 2 - menuHeight;
+      } else {
+        return screenSize.height;
+      }
+    }
+
+    return GestureDetector(
+      onDoubleTap: () {},
+      child: Consumer<AppData>(
+        builder: (context, appdata, child) {
+          var wallpaper = appdata.currentWallpaper;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              wallpaper.type == WallpaperType.from_outer
+                  ? Image.file(
+                      File(wallpaper.path),
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(wallpaper.path, fit: BoxFit.cover),
+              Column(
                 children: [
-                  wallpaper.type == WallpaperType.from_outer
-                      ? Image.file(
-                          File(wallpaper.path),
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(wallpaper.path, fit: BoxFit.cover),
-                  Container(child: Builder(
-                    builder: (context) {
-                      var menuState = context.watch<MenuState>();
-                      return Stack(
-                        children: [
-                          AnimatedPositioned(
-                              duration: Duration(milliseconds: 500),
-                              top: cubeTop(menuState.position),
-                              child: Container(
-                                  constraints: BoxConstraints.tight(
-                                      Size(screenSize.width, topAreaHeight)),
-                                  height: topAreaHeight,
-                                  child: PlayCubeWidget(
-                                    cube: cube,
-                                    touchable: true,
-                                    eventBus: eventBus,
-                                  ))),
-                          AnimatedPositioned(
-                              top: wallpaperPickerTop(
-                                  menuState.pickingWallpaper),
-                              child: SizedBox.fromSize(
-                                size: Size(
-                                    screenSize.width, screenSize.height / 3),
-                                child: WallpaperPicker(),
-                              ),
-                              duration: Duration(milliseconds: 500)),
-                          AnimatedPositioned(
-                              top: galleryTop(menuState.position),
-                              duration: Duration(milliseconds: 500),
-                              child: SizedBox.fromSize(
-                                size: screenSize,
-                                child: AppGalley(),
-                              )),
-                          AnimatedPositioned(
-                              top: faceColorPickerTop(
-                                  menuState.editingFaceColor),
-                              child: SizedBox.fromSize(
-                                size: Size(screenSize.width,
-                                    screenSize.height - topAreaHeight),
-                                child: FaceColorPicker(),
-                              ),
-                              duration: Duration(milliseconds: 500)),
-                        ],
-                      );
-                    },
-                  )),
+                  AnimatedContainer(
+                      color: Theme.of(context).primaryColor.withOpacity(
+                          context.watch<MenuState>().position ==
+                                  MenuPosition.top
+                              ? 1
+                              : 0),
+                      height: MediaQuery.of(context).padding.top,
+                      duration: Duration(milliseconds: 500)),
+                  Expanded(
+                    child: Container(child: Builder(
+                      builder: (context) {
+                        var menuState = context.watch<MenuState>();
+                        return Stack(
+                          children: [
+                            AnimatedPositioned(
+                                duration: Duration(milliseconds: 500),
+                                top: cubeTop(menuState.position),
+                                child: Container(
+                                    constraints: BoxConstraints.tight(
+                                        Size(screenSize.width, topAreaHeight)),
+                                    height: topAreaHeight,
+                                    child: PlayCubeWidget(
+                                      cube: cube,
+                                      touchable: true,
+                                    ))),
+                            AnimatedPositioned(
+                                top: wallpaperPickerTop(
+                                    menuState.pickingWallpaper),
+                                child: SizedBox.fromSize(
+                                  size: Size(
+                                      screenSize.width, screenSize.height / 3),
+                                  child: WallpaperPicker(),
+                                ),
+                                duration: Duration(milliseconds: 500)),
+                            AnimatedPositioned(
+                                top: galleryTop(menuState.position),
+                                duration: Duration(milliseconds: 500),
+                                child: SizedBox.fromSize(
+                                  size: screenSize,
+                                  child: AppGalley(),
+                                )),
+                            AnimatedPositioned(
+                                top: faceColorPickerTop(
+                                    menuState.editingFaceColor),
+                                child: SizedBox.fromSize(
+                                  size: Size(
+                                      screenSize.width,
+                                      screenSize.height -
+                                          topAreaWidth +
+                                          menuHeight),
+                                  child: FaceColorPicker(),
+                                ),
+                                duration: Duration(milliseconds: 500)),
+                          ],
+                        );
+                      },
+                    )),
+                  ),
                 ],
-              );
-            },
-          ),
-        );
-      },
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -174,9 +200,11 @@ class MenuState with ChangeNotifier {
 
   bool pickingWallpaper = false;
 
+  bool playing = false;
+
   MenuState(this.position, this.editingApp);
 
-  void update(MenuPosition position, bool edit) {
+  void update(MenuPosition position, bool edit) async {
     this.editingApp = edit;
     this.position = position;
     editingFaceColor = false;
@@ -195,6 +223,11 @@ class MenuState with ChangeNotifier {
 
   void toggleChoosingWallpaper() {
     this.pickingWallpaper = !pickingWallpaper;
+    notifyListeners();
+  }
+
+  void updatePlaying(bool playing) {
+    this.playing = playing;
     notifyListeners();
   }
 
@@ -222,8 +255,11 @@ class MenuState with ChangeNotifier {
         });
         break;
       case MenuPosition.bottom:
-        actions.addAll(
-            {MenuAction.action_choose_wallpaper, MenuAction.action_arrow_up});
+        actions.addAll({
+          MenuAction.action_start_rotating,
+          MenuAction.action_choose_wallpaper,
+          MenuAction.action_arrow_up
+        });
         break;
       default:
         break;
@@ -238,6 +274,7 @@ enum MenuAction {
   action_editing_cube,
   action_choose_color,
   action_choose_wallpaper,
+  action_start_rotating,
 }
 
 enum MenuPosition {

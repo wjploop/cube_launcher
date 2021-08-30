@@ -15,14 +15,15 @@ void main() {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light
+        .copyWith(statusBarColor: Colors.transparent));
 
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: "cube launcher",
         theme: ThemeData(
-          primarySwatch: Colors.blue,
-          primaryColor: Colors.white,
+          primaryColor: Colors.deepPurple,
         ),
         home: MultiProvider(
           providers: [
