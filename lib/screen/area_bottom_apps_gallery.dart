@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/components/cube.dart';
+import 'package:cube_launcher/components/popup_menu.dart';
 import 'package:cube_launcher/data/AppInfo.dart';
 import 'package:cube_launcher/data/Repo.dart';
 import 'package:cube_launcher/data/event.dart';
@@ -9,7 +10,10 @@ import 'package:cube_launcher/screen/area_top_bottom.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:uninstall_apps/uninstall_apps.dart';
 
 class AppGalley extends StatefulWidget {
   const AppGalley({Key? key}) : super(key: key);
@@ -205,64 +209,154 @@ class GalleryItem extends StatefulWidget {
 
 class _GalleryItemState extends State<GalleryItem>
     with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+  late Animation<double> scale;
+  var tween = Tween<double>(begin: 1.0, end: 1.2);
+
   @override
   void initState() {
     super.initState();
+    controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    scale = CurvedAnimation(parent: controller, curve: Curves.ease);
   }
-
-  GlobalKey uninstallKey = GlobalKey();
-  GlobalKey appInfoKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
     var iconSize = screenSize.width / 5 - 26;
+    var attachKey = GlobalKey();
     var itemWidget = GestureDetector(
+      key: attachKey,
       onTap: () {
         widget.app.rawApp.openApp();
       },
+      onTapDown: (detail) {
+        controller.forward();
+      },
+      onTapUp: (detail) {
+        print('tap up');
+        controller.animateBack(0);
+      },
+      onTapCancel: () {
+        print('tap cancel');
+      },
+      onLongPressUp: () {
+        print('long press up');
+        controller.animateBack(0);
+      },
+      onLongPressMoveUpdate: (detail) {
+        print('long press move update');
+      },
+      onLongPressStart: (details) {
+        print('on presss start');
+        HapticFeedback.selectionClick();
+      },
       onLongPress: () {
-        showDialog(
-          barrierColor: Colors.transparent,
-          context: context,
-          builder: (context) {
-            RenderBox renderBox = context.findRenderObject() as RenderBox;
-            var size = renderBox.size;
-            var position = renderBox.globalToLocal(Offset.zero);
+        RenderBox renderBox =
+            attachKey.currentContext?.findRenderObject() as RenderBox;
+        var size = renderBox.size;
+        var position = renderBox.localToGlobal(Offset.zero);
 
-            print('size :$size');
-            print('position :$position');
+        var attachedRect =
+            Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
 
-            return Container(
-              child: Wrap(children: [
-                Container(
-                  color: Colors.blue,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.delete_forever,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "卸载",
-                          style: Theme.of(context)
-                              .textTheme
-                              .subtitle1
-                              ?.copyWith(color: Colors.white),
-                        ),
-                      ],
+        print('renderBox: $renderBox');
+        print('size :$size');
+        print('position :$position');
+
+        var statusBarHeight = MediaQuery.of(context).padding.top;
+        print('statusBarHeight: $statusBarHeight');
+
+        // var popupRenderBox = popupKey.currentContext!.findRenderObject()
+        // as RenderBox;
+        // var popupSize = popupRenderBox.size;
+        // print('popup size $popupSize');
+        // var popupRect = Rect.fromLTWH(left, top, width, height)
+
+        Size childSize = Size.zero;
+
+        print('child size $childSize');
+
+        var arrowHeight = 15.0;
+
+        OverlayEntry? entry;
+
+        var itemWidgets = [
+          {
+            "icon": Icons.delete_forever,
+            "text": "卸载",
+            "action": () {
+              UninstallApps.uninstall(widget.app.packageName);
+            }
+          },
+          {
+            "icon": Icons.info_outline,
+            "text": "应用信息",
+            "action": () {
+              widget.app.rawApp.openSettingsScreen();
+            }
+          },
+        ]
+            .map(
+              (Map e) => ClipOval(
+                child: Material(
+                  shape: CircleBorder(),
+                  color: Colors.transparent,
+                  shadowColor: Colors.red,
+                  child: InkWell(
+                    onTap: () {
+                      e["action"]();
+                      entry?.remove();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            e["icon"],
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Text(e["text"],
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText2
+                                  ?.copyWith(fontSize: 10)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ]),
-            );
+              ),
+            )
+            .toList();
+
+        var popup = GestureDetector(
+          onTap: () {
+            entry?.remove();
           },
+          child: Container(
+            color: Colors.transparent,
+            child: CustomSingleChildLayout(
+              delegate: LayoutPopupMenu(attachedRect),
+              child: CustomPaint(
+                painter:
+                    ArrowDialogPainter(attachedRect, arrowHeight: arrowHeight),
+                child: Container(
+                  constraints: BoxConstraints.tightFor(),
+                  padding: EdgeInsets.only(
+                      left: 20, right: 20, bottom: arrowHeight + 5, top: 5),
+                  child: Row(children: itemWidgets),
+                ),
+              ),
+            ),
+          ),
         );
+        entry = OverlayEntry(builder: (context) => popup, opaque: false);
+        Overlay.of(context)?.insert(entry);
       },
       child: Container(
         height: iconSize * 2,
@@ -273,7 +367,8 @@ class _GalleryItemState extends State<GalleryItem>
               SizedBox(
                 height: 10,
               ),
-              Container(
+              ScaleTransition(
+                scale: tween.animate(scale),
                 child: ClipOval(
                   child: Image.memory(
                     widget.app.icon,
