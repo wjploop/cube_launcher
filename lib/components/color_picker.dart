@@ -13,15 +13,13 @@ class FaceColorPicker extends StatelessWidget {
     return Container(
       color: Colors.deepPurple.shade50,
       child: ColorPicker(
-        color: context
-            .read<FaceMap>()
-            .colorMap[context.read<MenuState>().editFace]!,
+        color: context.select((AppData appData) => appData.colorMap)[
+            context.read<MenuState>().editFace]!,
         onColorChanged: (color) {
-          var faceColorMap = context.read<FaceMap>();
+          var colorMap = context.read<AppData>().colorMap;
           var face = context.read<MenuState>().editFace;
-          var colorMap = faceColorMap.colorMap;
           var newMap = Map.of(colorMap)..[face] = color;
-          faceColorMap.updateColor(newMap);
+          context.read<AppData>().updateColor(newMap);
         },
         pickersEnabled: const <ColorPickerType, bool>{
           ColorPickerType.both: false,

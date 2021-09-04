@@ -28,107 +28,107 @@ class LauncherIconWidget extends StatelessWidget {
         color: Colors.black,
       );
     }
-    return Consumer<FaceMap>(builder: (context, map, child) {
-      var currentFace = map.appMap?[faceColor]!;
+    // var appMap = context.select((AppData app      Data) => appData.appMap);
+    var appMap = context.read<AppData>().appMap;
+    var currentFace = appMap[faceColor]!;
 
-      var app = currentFace![positionInAFace];
+    var app = currentFace[positionInAFace];
 
-      Widget AppIcon(
-        AppInfo app,
-      ) {
-        return ClipOval(
-          child: Container(
-            padding: EdgeInsets.all(10),
-            child: Image.memory(
-              app.icon,
-              color: context.watch<FaceMap>().colorMap[faceColor],
-              colorBlendMode: BlendMode.lighten,
-            ),
-          ),
-        );
-      }
-
-      var appWidget = app == null
-          ? Container()
-          : Stack(
-              children: [
-                AppIcon(app),
-                Container(
-                  constraints: BoxConstraints.expand(),
-                  alignment: Alignment.topRight,
-                  child: LayoutBuilder(builder: (context, constraints) {
-                    var closeIconSize = constraints.maxWidth / 3;
-                    return Visibility(
-                      visible: editing,
-                      child: GestureDetector(
-                        onTap: () {
-                          // 将该app移除
-                          currentFace[positionInAFace] = null;
-                          map.appMap?[faceColor] = currentFace;
-                          context.read<FaceMap>().updateApp(
-                                map.appMap,
-                              );
-                        },
-                        child: Container(
-                          margin: EdgeInsets.all(4),
-                          width: closeIconSize,
-                          height: closeIconSize,
-                          child: ClipOval(
-                              child: Container(
-                                  color: Colors.white60,
-                                  padding: EdgeInsets.all(4),
-                                  child: Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: closeIconSize - 8,
-                                  ))),
-                        ),
-                      ),
-                    );
-                  }),
-                )
-              ],
-            );
-
-      var dragTarget = Container(
-        child: DragTarget<AppInfo>(
-          onWillAccept: (data) {
-            return true;
-          },
-          builder: (context, candidateData, rejectedData) {
-            if (candidateData.isEmpty) {
-              return appWidget;
-            }
-            return AppIcon(candidateData.first!);
-          },
-          onAccept: (data) {
-            currentFace[positionInAFace] = data;
-            map.appMap?[faceColor] = currentFace;
-            context.read<FaceMap>().updateApp(
-                  map.appMap,
-                );
-          },
-        ),
-      );
-
-      var icon = Container(
-        decoration: BoxDecoration(
-            color: context.watch<FaceMap>().colorMap[faceColor],
-            border: Border.all(color: Colors.black, width: 1)),
-        child: dragTarget,
-      );
-
-      return GestureDetector(
-        onTap: () {
-          if (context.read<MenuState>().editting()) {
-            return;
-          }
-          app?.rawApp.openApp();
-        },
+    Widget AppIcon(
+      AppInfo app,
+    ) {
+      return ClipOval(
         child: Container(
-          child: icon,
+          padding: EdgeInsets.all(10),
+          child: Image.memory(
+            app.icon,
+            color: context.watch<AppData>().colorMap[faceColor],
+            colorBlendMode: BlendMode.lighten,
+          ),
         ),
       );
-    });
+    }
+
+    var appWidget = app == null
+        ? Container()
+        : Stack(
+            children: [
+              AppIcon(app),
+              Container(
+                constraints: BoxConstraints.expand(),
+                alignment: Alignment.topRight,
+                child: LayoutBuilder(builder: (context, constraints) {
+                  var closeIconSize = constraints.maxWidth / 3;
+                  return Visibility(
+                    visible: editing,
+                    child: GestureDetector(
+                      onTap: () {
+                        // 将该app移除
+                        currentFace[positionInAFace] = null;
+                        appMap[faceColor] = currentFace;
+                        context.read<AppData>().updateApp(
+                              appMap,
+                            );
+                      },
+                      child: Container(
+                        margin: EdgeInsets.all(4),
+                        width: closeIconSize,
+                        height: closeIconSize,
+                        child: ClipOval(
+                            child: Container(
+                                color: Colors.white60,
+                                padding: EdgeInsets.all(4),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: closeIconSize - 8,
+                                ))),
+                      ),
+                    ),
+                  );
+                }),
+              )
+            ],
+          );
+
+    var dragTarget = Container(
+      child: DragTarget<AppInfo>(
+        onWillAccept: (data) {
+          return true;
+        },
+        builder: (context, candidateData, rejectedData) {
+          if (candidateData.isEmpty) {
+            return appWidget;
+          }
+          return AppIcon(candidateData.first!);
+        },
+        onAccept: (data) {
+          currentFace[positionInAFace] = data;
+          appMap[faceColor] = currentFace;
+          context.read<AppData>().updateApp(
+                appMap,
+              );
+        },
+      ),
+    );
+
+    var icon = Container(
+      decoration: BoxDecoration(
+          color: context.watch<AppData>().colorMap[faceColor],
+          border: Border.all(color: Colors.black, width: 1)),
+      child: dragTarget,
+    );
+
+    return GestureDetector(
+      onTap: () {
+        if (context.read<MenuState>().editting()) {
+          return;
+        }
+        app?.rawApp.openApp();
+      },
+      child: Container(
+        child: icon,
+      ),
+    );
   }
 }

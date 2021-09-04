@@ -1,10 +1,10 @@
 import 'dart:math';
 
+import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/components/cube.dart';
 import 'package:cube_launcher/components/cube_component.dart';
-import 'package:cube_launcher/data/Repo.dart';
-import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 class PlayScreen extends StatefulWidget {
@@ -19,9 +19,6 @@ class PlayScreenState extends State<PlayScreen>
   bool loaded = false;
   late Cube cube;
 
-  EventBus eventBus = EventBus();
-
-
   bool inAnimation = false;
   late double animationLastAngle;
   late Vector3 animationAxis;
@@ -33,11 +30,10 @@ class PlayScreenState extends State<PlayScreen>
 
     WidgetsBinding.instance?.addPostFrameCallback(_afterLayout);
 
-    loadAppInfo();
+    // loadAppInfo();
   }
 
   void loadAppInfo() async {
-    await Repo.init();
     setState(() {
       loaded = true;
     });
@@ -59,7 +55,7 @@ class PlayScreenState extends State<PlayScreen>
   @override
   Widget build(BuildContext context) {
     Widget cubeArea;
-    if (loaded) {
+    if (!context.read<AppData>().hadLoad) {
       cubeArea = LayoutBuilder(
         builder: (context, constraints) => PlayCubeWidget(
           cube: cube,

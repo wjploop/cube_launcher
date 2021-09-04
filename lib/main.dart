@@ -1,12 +1,10 @@
 import 'package:cube_launcher/components/app_state.dart';
-import 'package:cube_launcher/components/cube.dart';
 import 'package:cube_launcher/screen/area_top_bottom.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'data/Repo.dart';
 
 void main() {
   runApp(App());
@@ -35,9 +33,6 @@ class App extends StatelessWidget {
             ),
             ChangeNotifierProvider(
               create: (context) => MenuState(MenuPosition.top, false),
-            ),
-            ChangeNotifierProvider(
-              create: (context) => FaceMap(Repo.map, defaultColorMap),
             ),
           ],
           child: Scaffold(

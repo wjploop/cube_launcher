@@ -4,7 +4,6 @@ import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/components/cube.dart';
 import 'package:cube_launcher/components/popup_menu.dart';
 import 'package:cube_launcher/data/AppInfo.dart';
-import 'package:cube_launcher/data/Repo.dart';
 import 'package:cube_launcher/data/event.dart';
 import 'package:cube_launcher/screen/area_top_bottom.dart';
 import 'package:event_bus/event_bus.dart';
@@ -32,8 +31,7 @@ class _AppGalleyState extends State<AppGalley> {
   }
 
   void loading() async {
-    await Repo.init();
-    context.read<AppData>().loaded();
+    await context.read<AppData>().loaded();
     Future.delayed(Duration(seconds: 2), () {
       context.read<MenuState>().update(MenuPosition.middle, false);
     });
@@ -111,10 +109,9 @@ class _AppGalleyState extends State<AppGalley> {
   }
 
   void updateFaceColor(FaceColor face, Color color) {
-    var faceColorMap = context.read<FaceMap>();
-    var colorMap = faceColorMap.colorMap;
+    var colorMap = context.select((AppData value) => value.colorMap);
     var newMap = Map.of(colorMap)..[face] = color;
-    faceColorMap.updateColor(newMap);
+    context.read<AppData>().updateColor(newMap);
   }
 
   @override
@@ -189,7 +186,10 @@ class _AppGalleyState extends State<AppGalley> {
                   padding: EdgeInsets.all(8),
                   mainAxisSpacing: 18,
                   crossAxisSpacing: 10,
-                  children: Repo.apps.map((e) => GalleryItem(app: e)).toList());
+                  children: context
+                      .select((AppData value) => value.apps)
+                      .map((e) => GalleryItem(app: e))
+                      .toList());
             },
           ),
         ),
@@ -240,6 +240,7 @@ class _GalleryItemState extends State<GalleryItem>
       },
       onTapCancel: () {
         print('tap cancel');
+        controller.animateBack(0);
       },
       onLongPressUp: () {
         print('long press up');
@@ -336,6 +337,9 @@ class _GalleryItemState extends State<GalleryItem>
 
         var popup = GestureDetector(
           onTap: () {
+            entry?.remove();
+          },
+          onPanStart: (detail) {
             entry?.remove();
           },
           child: Container(

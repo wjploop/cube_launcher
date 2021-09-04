@@ -36,9 +36,7 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
 
   @override
   Widget build(BuildContext context) {
-    return
-        // screenSize == null?
-        LayoutBuilder(builder: (context, constraints) {
+    return LayoutBuilder(builder: (context, constraints) {
       var screenSize = Size(constraints.maxWidth, constraints.maxHeight);
 
       screenSize = Size(screenSize.width,
@@ -156,7 +154,11 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                                 top: galleryTop(menuState.position),
                                 duration: Duration(milliseconds: 500),
                                 child: SizedBox.fromSize(
-                                  size: screenSize,
+                                  size: Size(
+                                      screenSize.width,
+                                      menuState.position == MenuPosition.middle
+                                          ? screenSize.height - topAreaWidth
+                                          : screenSize.height),
                                   child: AppGalley(),
                                 )),
                             AnimatedPositioned(
