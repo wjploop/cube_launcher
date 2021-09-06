@@ -9,3 +9,5 @@ class CubeFinishedEvent {}
 class ClockResetEvent {}
 
 class RotateToEditEvent {}
+
+class ResetCubeAndRotateToEditEvent {}

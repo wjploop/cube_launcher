@@ -92,7 +92,15 @@ class Cube {
       ..setEntry(3, 2, -0.0015); // 仅仅是设置 z 轴视觉高度，越远越小的效果
     // ..rotate(Vector3(0.0, 1.0, 0.0), -math.pi / 4) // rotate left 45c
     // ..rotate(Vector3(1.0, 0.0, -1.0), -math.pi / 8);
+
     cameraChanged();
+  }
+
+  void resetCube() {
+    pieces.forEach((p) {
+      p.reset();
+      positionMap[p.position] = p;
+    });
   }
 
   void reset() {
@@ -101,8 +109,8 @@ class Cube {
       ..setIdentity()
       ..setEntry(3, 2, -0.0015)
       // from https://medium.com/flutter-io/perspective-on-flutter-6f832f4d912e
-      ..rotate(Vector3(0.0, 1.0, 0.0), -math.pi / 4); // rotate left 45c
-    // ..rotate(Vector3(1.0, 0.0, -1.0), -math.pi / 8); // show the orange face
+      ..rotate(Vector3(0.0, 1.0, 0.0), -math.pi / 4) // rotate left 45c
+      ..rotate(Vector3(1.0, 0.0, -1.0), -math.pi / 8); // show the orange face
     pieces.forEach((p) {
       p.reset();
       positionMap[p.position] = p;

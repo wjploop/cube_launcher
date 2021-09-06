@@ -45,6 +45,12 @@ class _PlayCubeWidgetState extends State<PlayCubeWidget>
         widget.cube.rotateToConfig();
       });
     });
+    context.read<EventBus>().on<ResetCubeAndRotateToEditEvent>().listen((e) {
+      setState(() {
+        widget.cube.resetCube();
+        widget.cube.rotateToConfig();
+      });
+    });
   }
 
   @override

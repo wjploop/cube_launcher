@@ -67,13 +67,45 @@ class _AppGalleyState extends State<AppGalley> {
     }
 
     void stateEdit() {
-      context.read<EventBus>().fire(RotateToEditEvent());
+      if (!context.read<MenuState>().editingApp) {
+        context.read<EventBus>().fire(RotateToEditEvent());
+      }
       state.update(state.position, !state.editingApp);
     }
 
     void stateColorSelect() async {
-      context.read<EventBus>().fire(RotateToEditEvent());
-      context.read<MenuState>().toggleEditFaceColor();
+      var menuState = context.read<MenuState>();
+      var eventBus = context.read<EventBus>();
+      if (!menuState.editingFaceColor) {
+        // showDialog(
+        //   context: context,
+        //   builder: (context) => AlertDialog(
+        //     content: Text("配色需要还原魔方，是否继续"),
+        //     actions: [
+        //       TextButton(
+        //           onPressed: () {
+        //             Navigator.of(context).pop();
+        //           },
+        //           child: Text("取消")),
+        //       TextButton(
+        //           onPressed: () {
+        //             if (!menuState.editingFaceColor) {
+        //               eventBus.fire(ResetCubeAndRotateToEditEvent());
+        //             }
+        //             menuState.toggleEditFaceColor();
+        //             Navigator.of(context).pop();
+        //           },
+        //           child: Text("继续")),
+        //     ],
+        //   ),
+        // );
+        if (!menuState.editingFaceColor) {
+          eventBus.fire(ResetCubeAndRotateToEditEvent());
+        }
+        menuState.toggleEditFaceColor();
+      } else {
+        menuState.toggleEditFaceColor();
+      }
     }
 
     void stateWallpaperChoose() async {
@@ -147,11 +179,11 @@ class _AppGalleyState extends State<AppGalley> {
                       onPressed: () {
                         setState(() {
                           var menuState = context.read<MenuState>();
-                          if (menuState.editingApp ||
-                              menuState.editingFaceColor ||
-                              menuState.pickingWallpaper) {
-                            return;
-                          }
+                          // if (menuState.editingApp ||
+                          //     menuState.editingFaceColor ||
+                          //     menuState.pickingWallpaper) {
+                          //   return;
+                          // }
                           showAction = !showAction;
                         });
                       },

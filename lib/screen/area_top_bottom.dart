@@ -220,6 +220,7 @@ class MenuState with ChangeNotifier {
 
   void toggleEditFaceColor() {
     this.editingFaceColor = !editingFaceColor;
+    editFace = FaceColor.RED;
     notifyListeners();
   }
 

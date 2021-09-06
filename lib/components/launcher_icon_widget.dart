@@ -43,7 +43,7 @@ class LauncherIconWidget extends StatelessWidget {
           child: Image.memory(
             app.icon,
             color: context.watch<AppData>().colorMap[faceColor],
-            colorBlendMode: BlendMode.lighten,
+            colorBlendMode: BlendMode.softLight,
           ),
         ),
       );

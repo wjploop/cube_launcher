@@ -14,7 +14,7 @@ class FaceColorPicker extends StatelessWidget {
       color: Colors.deepPurple.shade50,
       child: ColorPicker(
         color: context.select((AppData appData) => appData.colorMap)[
-            context.read<MenuState>().editFace]!,
+            context.select((MenuState value) => value.editFace)]!,
         onColorChanged: (color) {
           var colorMap = context.read<AppData>().colorMap;
           var face = context.read<MenuState>().editFace;
