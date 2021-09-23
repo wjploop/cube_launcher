@@ -1,16 +1,25 @@
 # cube_launcher
 
-A new Flutter project.
+## 介绍
 
-## Getting Started
+3D的魔方桌面，使用应用图标作为方块，在玩弄（旋转、扭动）魔方的同时，点击图标打开相应的App。
 
-This project is a starting point for a Flutter application.
+另外支持：  
 
-A few resources to get you started if this is your first Flutter project:
+* 自定义配置魔方方块
+* 魔方配色 
+* 修改壁纸
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+## 预览
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+###视频
+
+### 图片
+
+![](preview/preview_1.jpg)
+![](preview/preview_2.jpg)
+![](preview/preview_3.jpg)
+![](preview/preview_4.jpg)
+![](preview/preview_5.jpg)
+![](preview/preview_6.jpg)
+
