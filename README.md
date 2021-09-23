@@ -14,12 +14,11 @@
 
 ###视频
 
+https://user-images.githubusercontent.com/13930019/134501049-6d3cfbfc-44bd-43e9-b316-aea3b918ef7c.mp4
+
 ### 图片
 
-![](preview/preview_1.jpg)
-![](preview/preview_2.jpg)
-![](preview/preview_3.jpg)
-![](preview/preview_4.jpg)
-![](preview/preview_5.jpg)
-![](preview/preview_6.jpg)
+<img src="preview/preview_1.jpg" width="200">  <img src="preview/preview_2.jpg" width="200"> <img src="preview/preview_3.jpg" width="200">
+
+<img src="preview/preview_4.jpg" width="200">  <img src="preview/preview_5.jpg" width="200"> <img src="preview/preview_6.jpg" width="200">
 
