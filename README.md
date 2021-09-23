@@ -1,4 +1,4 @@
-# cube_launcher
+# cube_launcher 魔方桌面
 
 ## 介绍
 
@@ -12,7 +12,7 @@
 
 ## 预览
 
-###视频
+### 视频
 
 https://user-images.githubusercontent.com/13930019/134501049-6d3cfbfc-44bd-43e9-b316-aea3b918ef7c.mp4
 
