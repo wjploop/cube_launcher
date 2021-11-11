@@ -258,6 +258,30 @@ class _GalleryItemState extends State<GalleryItem>
     var screenSize = MediaQuery.of(context).size;
     var iconSize = screenSize.width / 5 - 26;
     var attachKey = GlobalKey();
+
+    OverlayEntry? entry;
+
+    var popupActionItems = [
+      {
+        "key": GlobalKey(),
+        "occupyRect": Rect.zero,
+        "icon": Icons.delete_forever,
+        "text": "卸载",
+        "action": () {
+          UninstallApps.uninstall(widget.app.packageName);
+        }
+      },
+      {
+        "key": GlobalKey(),
+        "occupyRect": Rect.zero,
+        "icon": Icons.info_outline,
+        "text": "应用信息",
+        "action": () {
+          widget.app.rawApp.openSettingsScreen();
+        }
+      },
+    ];
+
     var itemWidget = GestureDetector(
       key: attachKey,
       onTap: () {
@@ -280,6 +304,33 @@ class _GalleryItemState extends State<GalleryItem>
       },
       onLongPressMoveUpdate: (detail) {
         print('long press move update');
+        // 判断是否弹出菜单
+        // 获取菜单的action坐标？？
+        // 触发
+        if (entry != null && entry?.mounted == true) {
+          popupActionItems.forEach((element) {
+            var rect = element["occupyRect"] as Rect;
+            if (rect == Rect.zero) {
+              var key = element["key"]! as GlobalKey;
+              var renderBox =
+                  key.currentContext?.findRenderObject() as RenderBox;
+              var offset = renderBox.localToGlobal(Offset.zero);
+              var actionRect = Rect.fromLTWH(offset.dx, offset.dy,
+                  renderBox.size.width, renderBox.size.height);
+              element["occupyRect"] = actionRect;
+              print('compute rect $actionRect');
+              rect = actionRect;
+            }
+
+            if (rect.contains(detail.globalPosition)) {
+              var action = element["action"] as Function;
+              print('do action ${element["text"]}');
+              action();
+              entry?.remove();
+              return;
+            }
+          });
+        }
       },
       onLongPressStart: (details) {
         print('on presss start');
@@ -313,24 +364,7 @@ class _GalleryItemState extends State<GalleryItem>
 
         var arrowHeight = 15.0;
 
-        OverlayEntry? entry;
-
-        var itemWidgets = [
-          {
-            "icon": Icons.delete_forever,
-            "text": "卸载",
-            "action": () {
-              UninstallApps.uninstall(widget.app.packageName);
-            }
-          },
-          {
-            "icon": Icons.info_outline,
-            "text": "应用信息",
-            "action": () {
-              widget.app.rawApp.openSettingsScreen();
-            }
-          },
-        ]
+        var popupActionItemsWidgets = popupActionItems
             .map(
               (Map e) => ClipOval(
                 child: Material(
@@ -338,6 +372,7 @@ class _GalleryItemState extends State<GalleryItem>
                   color: Colors.transparent,
                   shadowColor: Colors.red,
                   child: InkWell(
+                    key: e["key"],
                     onTap: () {
                       e["action"]();
                       entry?.remove();
@@ -385,14 +420,14 @@ class _GalleryItemState extends State<GalleryItem>
                   constraints: BoxConstraints.tightFor(),
                   padding: EdgeInsets.only(
                       left: 20, right: 20, bottom: arrowHeight + 5, top: 5),
-                  child: Row(children: itemWidgets),
+                  child: Row(children: popupActionItemsWidgets),
                 ),
               ),
             ),
           ),
         );
         entry = OverlayEntry(builder: (context) => popup, opaque: false);
-        Overlay.of(context)?.insert(entry);
+        Overlay.of(context)?.insert(entry!);
       },
       child: Container(
         height: iconSize * 2,
