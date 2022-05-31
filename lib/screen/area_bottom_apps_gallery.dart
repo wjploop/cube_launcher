@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:uninstall_apps/uninstall_apps.dart';
 
 class AppGalley extends StatefulWidget {
   const AppGalley({Key? key}) : super(key: key);
@@ -146,54 +145,71 @@ class _AppGalleyState extends State<AppGalley> {
     context.read<AppData>().updateColor(newMap);
   }
 
+  var menuDownDy = 0.0;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          height: menuHeight,
-          color: Colors.deepPurple,
-          child: Stack(
-            children: [
-              Center(
-                child: Text("Cube Launcher"),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                      child: Visibility(
-                    visible: showAction,
-                    child: Container(
-                      color: Colors.deepPurple,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: context
-                              .read<MenuState>()
-                              .actions()
-                              .map((e) => menuActionToWidget(
-                                  context.read<MenuState>(), e))
-                              .toList()),
-                    ),
-                  )),
-                  IconButton(
-                      onPressed: () {
-                        setState(() {
-                          var menuState = context.read<MenuState>();
-                          // if (menuState.editingApp ||
-                          //     menuState.editingFaceColor ||
-                          //     menuState.pickingWallpaper) {
-                          //   return;
-                          // }
-                          showAction = !showAction;
-                        });
-                      },
-                      icon: Icon(
-                        Icons.more_horiz,
-                        size: 26,
-                      )),
-                ],
-              ),
-            ],
+        GestureDetector(
+          onPanDown: (details) {
+            menuDownDy = details.localPosition.dy;
+          },
+          onPanUpdate: (details) {},
+          onPanEnd: (details) {
+            var dy = details.velocity.pixelsPerSecond.dy;
+            if (dy.abs() < 10) {
+              return;
+            }
+
+            // var deltaY = details.localPosition.dy - menuDownDy;
+            var lastPos = context.read<MenuState>().position;
+            MenuPosition nextPos;
+            if (dy > 0) {
+              nextPos = next(lastPos);
+            } else {
+              nextPos = prev(lastPos);
+            }
+            context.read<MenuState>().update(nextPos, false);
+          },
+          child: Container(
+            height: menuHeight,
+            color: Colors.deepPurple,
+            child: Stack(
+              children: [
+                Center(
+                  child: Text("Cube Launcher"),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                        child: Visibility(
+                      visible: showAction,
+                      child: Container(
+                        color: Colors.deepPurple,
+                        child: Row(mainAxisAlignment: MainAxisAlignment.end, children: context.read<MenuState>().actions().map((e) => menuActionToWidget(context.read<MenuState>(), e)).toList()),
+                      ),
+                    )),
+                    IconButton(
+                        onPressed: () {
+                          setState(() {
+                            var menuState = context.read<MenuState>();
+                            // if (menuState.editingApp ||
+                            //     menuState.editingFaceColor ||
+                            //     menuState.pickingWallpaper) {
+                            //   return;
+                            // }
+                            showAction = !showAction;
+                          });
+                        },
+                        icon: Icon(
+                          Icons.more_horiz,
+                          size: 26,
+                        )),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
         Expanded(
@@ -204,10 +220,7 @@ class _AppGalleyState extends State<AppGalley> {
                   child: Center(
                     child: Text(
                       "Loading...",
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline3
-                          ?.copyWith(color: Colors.white),
+                      style: Theme.of(context).textTheme.headline3?.copyWith(color: Colors.white),
                     ),
                   ),
                 );
@@ -218,10 +231,7 @@ class _AppGalleyState extends State<AppGalley> {
                   padding: EdgeInsets.all(8),
                   mainAxisSpacing: 18,
                   crossAxisSpacing: 10,
-                  children: context
-                      .select((AppData value) => value.apps)
-                      .map((e) => GalleryItem(app: e))
-                      .toList());
+                  children: context.select((AppData value) => value.apps).map((e) => GalleryItem(app: e)).toList());
             },
           ),
         ),
@@ -239,8 +249,7 @@ class GalleryItem extends StatefulWidget {
   _GalleryItemState createState() => _GalleryItemState();
 }
 
-class _GalleryItemState extends State<GalleryItem>
-    with SingleTickerProviderStateMixin {
+class _GalleryItemState extends State<GalleryItem> with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late Animation<double> scale;
   var tween = Tween<double>(begin: 1.0, end: 1.2);
@@ -248,8 +257,7 @@ class _GalleryItemState extends State<GalleryItem>
   @override
   void initState() {
     super.initState();
-    controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    controller = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     scale = CurvedAnimation(parent: controller, curve: Curves.ease);
   }
 
@@ -268,7 +276,7 @@ class _GalleryItemState extends State<GalleryItem>
         "icon": Icons.delete_forever,
         "text": "卸载",
         "action": () {
-          UninstallApps.uninstall(widget.app.packageName);
+          // UninstallApps.uninstall(widget.app.packageName);
         }
       },
       {
@@ -312,11 +320,9 @@ class _GalleryItemState extends State<GalleryItem>
             var rect = element["occupyRect"] as Rect;
             if (rect == Rect.zero) {
               var key = element["key"]! as GlobalKey;
-              var renderBox =
-                  key.currentContext?.findRenderObject() as RenderBox;
+              var renderBox = key.currentContext?.findRenderObject() as RenderBox;
               var offset = renderBox.localToGlobal(Offset.zero);
-              var actionRect = Rect.fromLTWH(offset.dx, offset.dy,
-                  renderBox.size.width, renderBox.size.height);
+              var actionRect = Rect.fromLTWH(offset.dx, offset.dy, renderBox.size.width, renderBox.size.height);
               element["occupyRect"] = actionRect;
               print('compute rect $actionRect');
               rect = actionRect;
@@ -337,13 +343,11 @@ class _GalleryItemState extends State<GalleryItem>
         HapticFeedback.selectionClick();
       },
       onLongPress: () {
-        RenderBox renderBox =
-            attachKey.currentContext?.findRenderObject() as RenderBox;
+        RenderBox renderBox = attachKey.currentContext?.findRenderObject() as RenderBox;
         var size = renderBox.size;
         var position = renderBox.localToGlobal(Offset.zero);
 
-        var attachedRect =
-            Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
+        var attachedRect = Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
 
         print('renderBox: $renderBox');
         print('size :$size');
@@ -388,11 +392,7 @@ class _GalleryItemState extends State<GalleryItem>
                           SizedBox(
                             height: 5,
                           ),
-                          Text(e["text"],
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyText2
-                                  ?.copyWith(fontSize: 10)),
+                          Text(e["text"], style: Theme.of(context).textTheme.bodyText2?.copyWith(fontSize: 10)),
                         ],
                       ),
                     ),
@@ -414,12 +414,10 @@ class _GalleryItemState extends State<GalleryItem>
             child: CustomSingleChildLayout(
               delegate: LayoutPopupMenu(attachedRect),
               child: CustomPaint(
-                painter:
-                    ArrowDialogPainter(attachedRect, arrowHeight: arrowHeight),
+                painter: ArrowDialogPainter(attachedRect, arrowHeight: arrowHeight),
                 child: Container(
                   constraints: BoxConstraints.tightFor(),
-                  padding: EdgeInsets.only(
-                      left: 20, right: 20, bottom: arrowHeight + 5, top: 5),
+                  padding: EdgeInsets.only(left: 20, right: 20, bottom: arrowHeight + 5, top: 5),
                   child: Row(children: popupActionItemsWidgets),
                 ),
               ),
@@ -457,10 +455,7 @@ class _GalleryItemState extends State<GalleryItem>
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context)
-                      .textTheme
-                      .caption
-                      ?.copyWith(color: Colors.white),
+                  style: Theme.of(context).textTheme.caption?.copyWith(color: Colors.white),
                 ),
               )
             ],
@@ -477,10 +472,7 @@ class _GalleryItemState extends State<GalleryItem>
           height: iconSize,
         ),
       ),
-      child: Container(
-          decoration: BoxDecoration(
-              color: Colors.white24, borderRadius: BorderRadius.circular(8)),
-          child: itemWidget),
+      child: Container(decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8)), child: itemWidget),
     );
     var editingApp = context.read<MenuState>().editingApp;
 

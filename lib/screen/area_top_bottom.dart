@@ -8,7 +8,6 @@ import 'package:cube_launcher/components/cube_component.dart';
 import 'package:cube_launcher/components/wallpaper_picker.dart';
 import 'package:cube_launcher/data/Wallpaper.dart';
 import 'package:cube_launcher/screen/area_bottom_apps_gallery.dart';
-import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -31,39 +30,39 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
 
   bool loadingApp = true;
 
-  // 只有第一次加载回踩
-  bool firstLayout = true;
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       var screenSize = Size(constraints.maxWidth, constraints.maxHeight);
 
-      screenSize = Size(screenSize.width,
-          screenSize.height - MediaQuery.of(context).padding.top);
+      screenSize = Size(screenSize.width, screenSize.height);
 
       return content(screenSize);
     });
     // content(screenSize!);
   }
 
+  // screenSize include:  status bar, nav bar
   Widget content(Size screenSize) {
-    var topAreaWidth = min(screenSize.width, screenSize.height);
+    var cubeContainerWidth = min(screenSize.width, screenSize.height);
+
+    var padding = MediaQuery.of(context).padding;
+
+    var size = Size(screenSize.width - padding.left - padding.right, screenSize.height - padding.top - padding.bottom);
+
     var topAreaHeight = screenSize.height - menuHeight;
 
     print('screen size $screenSize');
 
-    var cubeSize = topAreaWidth / 6;
+    var cubeSize = cubeContainerWidth / 6;
 
     cube = Cube(pieceSize: cubeSize);
-
-    EventBus eventBus = EventBus();
 
     double cubeTop(MenuPosition menuPosition) {
       if (menuPosition == MenuPosition.top) {
         return -topAreaHeight;
       } else if (menuPosition == MenuPosition.middle) {
-        return -(topAreaHeight - topAreaWidth) / 2;
+        return -(topAreaHeight - cubeContainerWidth) / 2;
       } else if (menuPosition == MenuPosition.bottom) {
         return (screenSize.height - menuHeight - topAreaHeight) / 2;
       } else {
@@ -75,10 +74,9 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
       if (menuPosition == MenuPosition.top) {
         return 0;
       } else if (menuPosition == MenuPosition.middle) {
-        return screenSize.height - topAreaWidth - menuHeight;
-      }
-      if (menuPosition == MenuPosition.bottom) {
-        return screenSize.height - menuHeight;
+        return cubeContainerWidth;
+      } else if (menuPosition == MenuPosition.bottom) {
+        return size.height - menuHeight;
       } else {
         throw "No support menu position $menuPosition";
       }
@@ -86,9 +84,9 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
 
     double faceColorPickerTop(bool editingFaceColor) {
       if (editingFaceColor) {
-        return screenSize.height - topAreaWidth;
+        return cubeContainerWidth + menuHeight;
       } else {
-        return screenSize.height;
+        return size.height;
       }
     }
 
@@ -117,11 +115,8 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
               Column(
                 children: [
                   AnimatedContainer(
-                      color: Theme.of(context).primaryColor.withOpacity(
-                          context.watch<MenuState>().position ==
-                                  MenuPosition.top
-                              ? 1
-                              : 0),
+                      // 状态栏占位
+                      color: Theme.of(context).primaryColor.withOpacity(context.watch<MenuState>().position == MenuPosition.top ? 1 : 0),
                       height: MediaQuery.of(context).padding.top,
                       duration: Duration(milliseconds: 500)),
                   Expanded(
@@ -134,19 +129,15 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                                 duration: Duration(milliseconds: 500),
                                 top: cubeTop(menuState.position),
                                 child: Container(
-                                    constraints: BoxConstraints.tight(
-                                        Size(screenSize.width, topAreaHeight)),
-                                    height: topAreaHeight,
+                                    constraints: BoxConstraints.tight(Size(screenSize.width, size.height - menuHeight)),
                                     child: PlayCubeWidget(
                                       cube: cube,
                                       touchable: true,
                                     ))),
                             AnimatedPositioned(
-                                top: wallpaperPickerTop(
-                                    menuState.pickingWallpaper),
+                                top: wallpaperPickerTop(menuState.pickingWallpaper),
                                 child: SizedBox.fromSize(
-                                  size: Size(
-                                      screenSize.width, screenSize.height / 3),
+                                  size: Size(screenSize.width, screenSize.height / 3),
                                   child: WallpaperPicker(),
                                 ),
                                 duration: Duration(milliseconds: 500)),
@@ -154,23 +145,14 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                                 top: galleryTop(menuState.position),
                                 duration: Duration(milliseconds: 500),
                                 child: SizedBox.fromSize(
-                                  size: Size(
-                                      screenSize.width,
-                                      menuState.position == MenuPosition.middle
-                                          ? screenSize.height - topAreaWidth
-                                          : screenSize.height),
+                                  size: Size(screenSize.width, menuState.position == MenuPosition.middle ? size.height - cubeContainerWidth : size.height),
                                   child: AppGalley(),
                                 )),
                             AnimatedPositioned(
-                                top: faceColorPickerTop(
-                                    menuState.editingFaceColor),
+                                top: faceColorPickerTop(menuState.editingFaceColor),
                                 child: SizedBox.fromSize(
-                                  size: Size(
-                                      screenSize.width,
-                                      screenSize.height -
-                                          topAreaWidth +
-                                          menuHeight),
-                                  child: FaceColorPicker(),
+                                  size: Size(screenSize.width, size.height - cubeContainerWidth - menuHeight),
+                                  child: SingleChildScrollView(child: FaceColorPicker()),
                                 ),
                                 duration: Duration(milliseconds: 500)),
                           ],
@@ -178,6 +160,11 @@ class _AreaTopBottomState extends State<AreaTopBottom> {
                       },
                     )),
                   ),
+                  // nav bar 占位
+                  Container(
+                    height: MediaQuery.of(context).padding.bottom,
+                    color: Theme.of(context).primaryColor,
+                  )
                 ],
               ),
             ],
@@ -250,19 +237,10 @@ class MenuState with ChangeNotifier {
         actions.addAll({MenuAction.action_arrow_down});
         break;
       case MenuPosition.middle:
-        actions.addAll({
-          MenuAction.action_editing_cube,
-          MenuAction.action_choose_color,
-          MenuAction.action_arrow_up,
-          MenuAction.action_arrow_down
-        });
+        actions.addAll({MenuAction.action_editing_cube, MenuAction.action_choose_color, MenuAction.action_arrow_up, MenuAction.action_arrow_down});
         break;
       case MenuPosition.bottom:
-        actions.addAll({
-          MenuAction.action_start_rotating,
-          MenuAction.action_choose_wallpaper,
-          MenuAction.action_arrow_up
-        });
+        actions.addAll({MenuAction.action_start_rotating, MenuAction.action_choose_wallpaper, MenuAction.action_arrow_up});
         break;
       default:
         break;
