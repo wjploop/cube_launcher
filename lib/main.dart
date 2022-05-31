@@ -1,10 +1,10 @@
 import 'package:cube_launcher/components/app_state.dart';
 import 'package:cube_launcher/screen/area_top_bottom.dart';
+import 'package:cube_plugin/cube_plugin.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-
 
 void main() {
   runApp(App());
@@ -35,7 +35,14 @@ class App extends StatelessWidget {
             ),
           ],
           child: Scaffold(
-              body: Container(color: Colors.blue, child: AreaTopBottom())),
+              body: WillPopScope(
+                  onWillPop: () async {
+                    var isSet = await CubePlugin.isSetLauncherToSelf;
+                    // if set launcher to current app, consume this back button
+                    print('onWillPop isSetLauncher: $isSet');
+                    return !isSet;
+                  },
+                  child: Container(color: Colors.blue, child: AreaTopBottom()))),
         ));
   }
 }

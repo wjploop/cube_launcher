@@ -6,6 +6,7 @@ import 'package:cube_launcher/components/popup_menu.dart';
 import 'package:cube_launcher/data/AppInfo.dart';
 import 'package:cube_launcher/data/event.dart';
 import 'package:cube_launcher/screen/area_top_bottom.dart';
+import 'package:cube_plugin/cube_plugin.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -276,7 +277,7 @@ class _GalleryItemState extends State<GalleryItem> with SingleTickerProviderStat
         "icon": Icons.delete_forever,
         "text": "卸载",
         "action": () {
-          // UninstallApps.uninstall(widget.app.packageName);
+          CubePlugin.unstall(widget.app.packageName);
         }
       },
       {
