@@ -52,7 +52,7 @@ class App extends StatelessWidget {
                     print('onWillPop isSetLauncher: $isSet');
                     return !isSet;
                   },
-                  child: Container(color: Colors.blue, child: AreaTopBottom()))),
+                  child: Container(child: AreaTopBottom()))),
         ));
   }
 }

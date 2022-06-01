@@ -21,7 +21,6 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'es';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "app_info": MessageLookupByLibrary.simpleMessage("información de la aplicación"),
         "app_name": MessageLookupByLibrary.simpleMessage("Lanzador de cubos"),

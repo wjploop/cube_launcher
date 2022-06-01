@@ -26,7 +26,6 @@ import 'messages_zh-CN.dart' as messages_zh_cn;
 import 'messages_zh-TW.dart' as messages_zh_tw;
 
 typedef Future<dynamic> LibraryLoader();
-
 Map<String, LibraryLoader> _deferredLibraries = {
   'de': () => new Future.value(null),
   'en': () => new Future.value(null),
