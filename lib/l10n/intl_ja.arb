@@ -1,0 +1,11 @@
+{
+  "@@locale": "ja",
+  "app_info": "アプリケーション情報",
+  "@app_info": {},
+  "app_name": "キューブランチャー",
+  "@app_name": {},
+  "loading": "読み込んでいます...",
+  "@loading": {},
+  "uninstall": "アンインストール",
+  "@uninstall": {}
+}

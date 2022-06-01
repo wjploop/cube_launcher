@@ -1,0 +1,11 @@
+{
+  "@@locale": "es",
+  "app_info": "información de la aplicación",
+  "@app_info": {},
+  "app_name": "Lanzador de cubos",
+  "@app_name": {},
+  "loading": "Cargando...",
+  "@loading": {},
+  "uninstall": "desinstalar",
+  "@uninstall": {}
+}

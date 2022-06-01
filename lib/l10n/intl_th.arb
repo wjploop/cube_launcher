@@ -1,0 +1,11 @@
+{
+  "@@locale": "th",
+  "app_info": "ข้อมูลการสมัคร",
+  "@app_info": {},
+  "app_name": "Cube Launcher",
+  "@app_name": {},
+  "loading": "กำลังโหลด...",
+  "@loading": {},
+  "uninstall": "ถอนการติดตั้ง",
+  "@uninstall": {}
+}

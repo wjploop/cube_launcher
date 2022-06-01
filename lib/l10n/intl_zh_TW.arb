@@ -1,0 +1,11 @@
+{
+  "@@locale": "zh-TW",
+  "app_info": "申請信息",
+  "@app_info": {},
+  "app_name": "啟動器",
+  "@app_name": {},
+  "loading": "正在加載...",
+  "@loading": {},
+  "uninstall": "卸載",
+  "@uninstall": {}
+}

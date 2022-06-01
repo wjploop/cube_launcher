@@ -1,0 +1,11 @@
+{
+  "@@locale": "fr",
+  "app_info": "informations sur l'application",
+  "@app_info": {},
+  "app_name": "Lanceur de cubes",
+  "@app_name": {},
+  "loading": "Chargement...",
+  "@loading": {},
+  "uninstall": "désinstaller",
+  "@uninstall": {}
+}

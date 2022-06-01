@@ -4,7 +4,10 @@ import 'package:cube_plugin/cube_plugin.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+
+import 'generated/l10n.dart';
 
 void main() {
   runApp(App());
@@ -22,6 +25,13 @@ class App extends StatelessWidget {
         theme: ThemeData(
           primaryColor: Colors.deepPurple,
         ),
+        localizationsDelegates: [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
         home: MultiProvider(
           providers: [
             Provider(

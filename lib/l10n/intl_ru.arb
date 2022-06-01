@@ -1,0 +1,11 @@
+{
+  "@@locale": "ru",
+  "app_info": "информация о приложении",
+  "@app_info": {},
+  "app_name": "Кубическая пусковая установка",
+  "@app_name": {},
+  "loading": "Загрузка...",
+  "@loading": {},
+  "uninstall": "удалить",
+  "@uninstall": {}
+}

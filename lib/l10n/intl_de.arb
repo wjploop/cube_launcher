@@ -1,0 +1,11 @@
+{
+  "@@locale": "de",
+  "app_info": "Anwendungsinfo",
+  "@app_info": {},
+  "app_name": "Cube-Launcher",
+  "@app_name": {},
+  "loading": "Wird geladen...",
+  "@loading": {},
+  "uninstall": "deinstallieren",
+  "@uninstall": {}
+}

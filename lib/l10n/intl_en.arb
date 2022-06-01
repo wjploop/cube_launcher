@@ -1,0 +1,11 @@
+{
+  "@@locale": "en",
+  "app_info": "application info",
+  "@app_info": {},
+  "app_name": "Cube Desktop",
+  "@app_name": {},
+  "loading": "Loading...",
+  "@loading": {},
+  "uninstall": "uninstall",
+  "@uninstall": {}
+}

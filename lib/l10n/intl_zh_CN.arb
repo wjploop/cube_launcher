@@ -1,0 +1,11 @@
+{
+  "@@locale": "zh-CN",
+  "app_info": "应用信息",
+  "@app_info": {},
+  "app_name": "魔方桌面",
+  "@app_name": {},
+  "loading": "加载中...",
+  "@loading": {},
+  "uninstall": "卸载",
+  "@uninstall": {}
+}

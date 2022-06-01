@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
+import '../generated/l10n.dart';
+
 class PlayScreen extends StatefulWidget {
   @override
   PlayScreenState createState() {
@@ -14,8 +16,7 @@ class PlayScreen extends StatefulWidget {
   }
 }
 
-class PlayScreenState extends State<PlayScreen>
-    with SingleTickerProviderStateMixin {
+class PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateMixin {
   bool loaded = false;
   late Cube cube;
 
@@ -28,7 +29,7 @@ class PlayScreenState extends State<PlayScreen>
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance?.addPostFrameCallback(_afterLayout);
+    WidgetsBinding?.instance?.addPostFrameCallback(_afterLayout);
 
     // loadAppInfo();
   }
@@ -64,7 +65,7 @@ class PlayScreenState extends State<PlayScreen>
       );
     } else {
       cubeArea = Center(
-        child: Text("loading"),
+        child: Text(S.of(context).loading),
       );
     }
 

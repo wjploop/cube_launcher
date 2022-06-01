@@ -24,6 +24,9 @@ dependencies:
 
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.17.0
   cube_plugin:
     path: cube_plugin
   event_bus: ^2.0.0
@@ -86,3 +89,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+flutter_intl:
+  enabled: true
+  localizely:
+    project_id: 39dd85b2-3329-4ab6-b3df-240c01b5443a

@@ -8,11 +8,11 @@ import 'package:cube_launcher/data/event.dart';
 import 'package:cube_launcher/screen/area_top_bottom.dart';
 import 'package:cube_plugin/cube_plugin.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
+import '../generated/l10n.dart';
 
 class AppGalley extends StatefulWidget {
   const AppGalley({Key? key}) : super(key: key);
@@ -179,7 +179,7 @@ class _AppGalleyState extends State<AppGalley> {
             child: Stack(
               children: [
                 Center(
-                  child: Text("Cube Launcher"),
+                  child: Text(S.of(context).app_name),
                 ),
                 Row(
                   children: [
@@ -220,7 +220,7 @@ class _AppGalleyState extends State<AppGalley> {
                 return Container(
                   child: Center(
                     child: Text(
-                      "Loading...",
+                      S.of(context).loading,
                       style: Theme.of(context).textTheme.headline3?.copyWith(color: Colors.white),
                     ),
                   ),
@@ -275,7 +275,7 @@ class _GalleryItemState extends State<GalleryItem> with SingleTickerProviderStat
         "key": GlobalKey(),
         "occupyRect": Rect.zero,
         "icon": Icons.delete_forever,
-        "text": "卸载",
+        "text": S.of(context).uninstall,
         "action": () {
           CubePlugin.unstall(widget.app.packageName);
         }
@@ -284,7 +284,7 @@ class _GalleryItemState extends State<GalleryItem> with SingleTickerProviderStat
         "key": GlobalKey(),
         "occupyRect": Rect.zero,
         "icon": Icons.info_outline,
-        "text": "应用信息",
+        "text": S.of(context).app_info,
         "action": () {
           widget.app.rawApp.openSettingsScreen();
         }
