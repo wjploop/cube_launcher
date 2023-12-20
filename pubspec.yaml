@@ -26,14 +26,14 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.17.0
+  intl: ^0.18.1
   cube_plugin:
     path: cube_plugin
   event_bus: ^2.0.0
   device_apps: ^2.1.1
   provider: ^5.0.0
   flex_color_picker: ^2.1.2
-  image_picker: ^0.8.3+3
+  image_picker: ^1.0.5
   video_player: ^2.1.14
   # intent卸载 app存在问题
   #https://stackoverflow.com/questions/55163793/how-to-uninstall-an-app-in-flutter-programatically
